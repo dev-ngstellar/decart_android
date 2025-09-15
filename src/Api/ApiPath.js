@@ -1,0 +1,49 @@
+// live
+export const BASE_URL = "http://115.187.22.233:2020/api/";
+// test
+// export const BASE_URL = "http://115.187.22.233:1588/api/";
+
+export const DEVICE_LOG = BASE_URL + "DeviceLog";
+export const GET_CUSTOMER_TYPES = BASE_URL + "GeTCustomerTypes";
+export const UPDATE_CUSTOMER_REGISTRATION =
+  BASE_URL + "UpdateCustomerRegistration";
+export const LOGIN = BASE_URL + "CustomerLogin";
+export const GET_CUSTOMER_PROFILE = BASE_URL + "GetCustomerProfile";
+export const FORGOT_PASSWORD = BASE_URL + "ForgotPassword";
+export const VERIFY_OTP = BASE_URL + "VerifyOTP";
+export const GET_OTP = BASE_URL + "GETOTP";
+export const GET_NOTIFICATIONS = BASE_URL + "GetNotifications";
+export const GET_POINTS = BASE_URL + "GetPoints";
+export const GET_SALES_HISTORY = BASE_URL + "GetSalesHistory";
+export const GET_VOUCHER = BASE_URL + "GetVouchers";
+export const GET_COUPONS = BASE_URL + "GetCoupons";
+export const CHECK_NEWLOGIN_ID = BASE_URL + "CheckNewLoginID";
+export const REDEEM_COUPON = BASE_URL + "RedeemCoupon";
+export const REDEEM_VOUCHER = BASE_URL + "RedeemVoucher";
+export const PROMO_LINK = BASE_URL + "GetPromolink";
+export const GET_RACES = BASE_URL + "GetCustomerRaces";
+export const GET_RELIGION = BASE_URL + "GetCustomerReligion";
+export const UPDATE_PROFILE = BASE_URL + "CustomerUpdateProfile";
+export const UPDATE_FAMILY_PROFILE = BASE_URL + "CustomerFamilyProfile";
+export const UPDATE_PASSWORD = BASE_URL + "ChangeCustomerPassword";
+export const BAKI_EPP = BASE_URL + "GetBakiEPP";
+export const GET_BANNER = BASE_URL + "GetBanner";
+export const GET_DISCOUNT = BASE_URL + "GetDiscountListing";
+export const GENERATE_OTP = BASE_URL + "GenerateOTP";
+export const USER_PROFILE = BASE_URL + "GetUserProfile";
+export const CHECK_NRIC = BASE_URL + "CheckNRICNo";
+export const GET_FAMILY_PROFILE = BASE_URL + "GetFamilyProfile";
+export const CHECK_PHONE = BASE_URL + "CheckHpNo";
+export const CHECK_EMAIL = BASE_URL + "CheckEmail";
+export const VERSION_LOG = BASE_URL + "DeviceVersionLog";
+export const POINTS_HISTORY = BASE_URL + "GetPointsHistory";
+export const FEEDBACK_TYPE = BASE_URL + "FeedbackType";
+export const GET_FEEDBACK = BASE_URL + "Feedback";
+export const DELETE_FAMILY = BASE_URL + "DeleteFamilyProfile";
+export const UPDATE_DEVICEID = BASE_URL + "UpdateDeviceID";
+export const UPDATE_NOTIFICATION_STATUS = BASE_URL + "UpdateNotificationStatus";
+export const GET_NOTIFICATION_COUNT = BASE_URL + "GetNotificationsCount";
+export const BIOMETRIC_LOGIN = BASE_URL + "BiometricLogin";
+export const GET_CAMPAIGNS = BASE_URL + 'GetCampaigns';
+export const UPDATE_CAMPAIGNS = BASE_URL + 'UpdateCustomerCampaign';
+export const GET_SUB_CAMPAIGNS = BASE_URL + 'GetSubCampaigns'
