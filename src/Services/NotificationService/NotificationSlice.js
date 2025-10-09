@@ -14,7 +14,7 @@ export const GetNotifiationThunk = createAsyncThunk(
     dispatch(setIsLoading(true));
     try {
       const response = await NotificationApi(action.payload);
-      // console.log("Notification :: " + JSON.stringify(response));
+      console.log("Notification :: " + JSON.stringify(response));
       dispatch(setIsLoading(false));
       return response.data;
     } catch (error) {
@@ -47,7 +47,7 @@ export const GetNotifiationCountThunk = createAsyncThunk(
     dispatch(setIsLoading(true));
     try {
       const response = await GetNotificationCount(action.payload);
-      // console.log("getNotifiationcount " + JSON.stringify(response));
+      //console.log("getNotifiationcount " + JSON.stringify(response));
       dispatch(setIsLoading(false));
       return response.data;
     } catch (error) {

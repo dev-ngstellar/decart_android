@@ -48,6 +48,7 @@ const Coupan = ({navigation,route}) => {
     getVouchar()
   },[deviceId])
 
+
   const onRefresh = async () => {
     setRefreshing(true);
     await getVouchar();

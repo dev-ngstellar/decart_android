@@ -58,14 +58,6 @@ const Splash = ({navigation}) => {
   useEffect(()=>{
     getDeviceLog()
   },[])
-  
-
-
-  
-  
-  
-
-  
 
   return (
     <SafeAreaView style={styles.mainContainer}>

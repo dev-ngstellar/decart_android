@@ -32,7 +32,7 @@ const Main = ({ navigation }) => {
   const [deviceId, setDeviceId] = useState('');
   const [totpCode, setTotpCode] = useState('');
   const [timestamp, setTimestamp] = useState(Date.now());
-  const [countdown, setCountdown] = useState(60);
+  const [countdown, setCountdown] = useState(10);
   const profileImage = useSelector(state => state.login.profileImage);
   const totp = new TOTP();
   const secret = "JBSWY3DPEHPK3PXP";

@@ -89,6 +89,13 @@ const Dashboard = ({ navigation }) => {
     try {
       const response = await dispatch(GetCustomerProfileThunk({ payload }));
       if (response) {
+
+        // checkDeviceID(); logged id device id and reponse device id
+      //  if (deviceId !== ProfileData[0]?.DevID) {
+      //     Alert.alert("Peranti ini tidak berdaftar");
+      //
+      // app version check if both are not equal alert for update the app response "AppVer":"2.0",
+
       }
     } catch (error) {
       console.log(error);
@@ -183,7 +190,7 @@ const Dashboard = ({ navigation }) => {
     }
   };
   // console.log("ProfileData DEVIDtest---", deviceId !== ProfileData[0]?.DevID);
-  // console.log("deviceId", deviceId);
+   console.log("deviceId", deviceId);
   // console.log("ProfileDataDevID", ProfileData[0]?.DevID);
 
   // Notifation api call
@@ -194,9 +201,10 @@ const Dashboard = ({ navigation }) => {
       CustID: custId,
       DevID: deviceId,
     };
+   
     console.log("payloadNotification", payload);
     const response = await dispatch(GetNotifiationThunk({ payload }));
-    // console.log("notification data:", response);
+     //console.log("notification data:", response);
   };
 
   //notification count api call
@@ -208,6 +216,7 @@ const Dashboard = ({ navigation }) => {
       DevID: deviceId,
     };
     await dispatch(GetNotifiationCountThunk({ payload }));
+
   };
 
   const getPromo = async () => {
@@ -221,7 +230,7 @@ const Dashboard = ({ navigation }) => {
   const getBanner = async () => {
     try {
       const custId = await getData("CustId");
-      // console.log('cusid',custId)
+      // console.log('custid',custId)
       const payload = {
         CustId: custId,
       };
@@ -236,12 +245,12 @@ const Dashboard = ({ navigation }) => {
     const payload = {
       CustID: custId,
       DevID: deviceId,
-      HPVerNo: "1.2",
+      HPVerNo: "2.1",
     };
     console.log(payload);
     const res = await dispatch(VersionLogThunk({ payload }));
     console.log("Version Log :: " + JSON.stringify(res));
-    if (res.payload.DeCart_Ver != "1.2") {
+    if (res.payload.DeCart_Ver != "2.1") {
       Alert.alert(res.payload.API_Result);
     }
   };

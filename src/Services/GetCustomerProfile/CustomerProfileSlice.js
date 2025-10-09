@@ -9,11 +9,13 @@ const initialState = {
     'getCustomerProfile',
     async action => {
       try {
+        console.log('payload in thunk',action.payload);
         const response = await CustomerProfileApi(action.payload);
+        console.log('testing users:',action.payload);
         console.log('testing users:',response.data)
         return response.data;
       } catch (error) {
-        console.log(error);
+        console.log(error)
       }
     },
   );

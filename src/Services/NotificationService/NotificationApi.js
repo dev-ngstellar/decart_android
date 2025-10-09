@@ -2,14 +2,14 @@ import API from "../../Api/Api";
 import { GET_NOTIFICATION_COUNT, GET_NOTIFICATIONS, UPDATE_NOTIFICATION_STATUS } from "../../Api/ApiPath";
 
 export const NotificationApi = payload => {
+  console.log('Notification payload',payload);
   const api = API.post(GET_NOTIFICATIONS, payload);
-  // console.log('paylod',payload)
+   console.log('paylod',payload);
    const response = api.then(res => res.data);
-  //  console.log('notification data',response)
-
+   console.log('notification data',response)
   return response;
 };
-
+ 
 
 export const UpdateNotification = payload => {
   const api = API.post(UPDATE_NOTIFICATION_STATUS, payload);

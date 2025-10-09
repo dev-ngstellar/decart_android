@@ -206,6 +206,8 @@ const Login = ({ navigation }) => {
       const payload = {
             DevID: deviceId,  
       }
+
+       console.log("Biometric Login Payload:", payload);
           const response = dispatch(biometricLoginThunk({ payload, navigation }));
       // Alert.alert('Success', 'Biometric authentication successful!');
       // navigation.navigate('Main')
