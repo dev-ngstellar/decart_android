@@ -16,8 +16,11 @@ export const CheckNewLoginIdThunk = createAsyncThunk(
   async action => {
    
     try {
+
+      //console.log('Payload sent to CheckNewLoginApi ::', action.payload);
       const response = await CheckNewLoginApi(action.payload);
-   
+  
+      //console.log('Response from CheckNewLoginApi ::', response.data);
       return response.data;
     } catch (error) {
       console.log(error);

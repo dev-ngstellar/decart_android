@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { biometricLoginApi, loginApi, update_device_id } from './LoginApi';
-import { storeData } from '../../Utils/localHelper';
+import { storeData ,getData, clearData  } from '../../Utils/localHelper';
 import { Alert } from 'react-native';
 
 const initialState = {
@@ -23,25 +23,25 @@ export const LoginThunk = createAsyncThunk(
       console.log("Login Response :: " + JSON.stringify(response.data));
 
       if (response && response?.data?.ApiResultID == 1) {
-        // ✅ Normal successful login (same device or no RegDevID restriction)
-        console.log("✅ Login successful on registered device");
+        // Normal successful login (same device or no RegDevID restriction)
+        console.log("Login successful on registered device");
         await storeData('CustId', response.data.CustId.toString());
         await storeData('token', response.token);
         resetFormLogin();
         navigation.navigate('Main');
       } 
       else if (response && response?.data?.ApiResultID == 2) {
-        console.log("⚠️ Multiple device login detected");
+        console.log("Multiple device login detected");
 
-        const registeredDevId = response?.data?.RegDevID;
+        const registeredDevId = response?.data?.RegDeviceID; 
         const currentDevId = payload?.DevID;
 
         console.log("Registered Device ID:", registeredDevId);
         console.log("Current Device ID:", currentDevId);
 
-        // 🧩 Step 1: If both device IDs are same → normal login
+        // Step 1: If both device IDs are same → normal login
         if (registeredDevId === currentDevId) {
-          console.log("✅ Same device detected, proceeding to main...");
+          console.log(" Same device detected, proceeding to main...");
           await storeData('CustId', response.data.CustId.toString());
           await storeData('token', response.token);
           resetFormLogin();
@@ -49,15 +49,15 @@ export const LoginThunk = createAsyncThunk(
           return response.data;
         }
 
-        // 🧩 Step 2: Different device → show multiple login warning first
+        // Step 2: Different device → show multiple login warning first
         Alert.alert(
-          "Multiple Device Login Detected",
+          "Multiple Device Login Detected please contact admin",
           "Log masuk pada berbilang peranti dikesan.",
           [
             {
               text: "OK",
               onPress: () => {
-                // 🧩 After OK, show the confirmation to make this main device
+                // After OK, show the confirmation to make this main device
                 Alert.alert(
                   "Do you want to use this device as your main account?",
                   "Adakah anda ingin menggunakan peranti ini sebagai akaun utama?",
@@ -75,15 +75,20 @@ export const LoginThunk = createAsyncThunk(
                             RegDevID: currentDevId,
                             UserId: response.data.CustId,
                           };
+                          console.log("Login Service - Update Device Payload:", devicePayload);
 
                           console.log("DevicePayload ::", devicePayload);
 
-                          // 🔄 API call to update registered device
+                          //  API call to update registered device
                           const deviceResponse = await update_device_id(devicePayload);
                           console.log("Device Response :: " + deviceResponse);
 
                           await storeData('CustId', response.data.CustId.toString());
                           await storeData('token', response.token);
+                          // Clear local data to avoid conflicts
+                          //await clearData();
+                          //console.log("Local data cleared after device change.");
+
                           resetFormLogin();
                           navigation.navigate('Main');
                         } catch (err) {
@@ -113,7 +118,7 @@ export const LoginThunk = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      console.log("❌ Error during login flow:", error);
+      console.log("Error during login flow:", error);
     } finally {
       dispatch(setIsLoading(false));
     }
@@ -145,6 +150,7 @@ export const biometricLoginThunk = createAsyncThunk(
                 "RegDevID":payload.DevID,
                 "UserId":response.data.CustId}
                 
+                console.log("Biometric - Update Device Payload:", devicePauload);
                 console.log('DevicePayLaod',devicePauload)
               const deviceResponse = await update_device_id(devicePauload);
               console.log("Device Response :: "+deviceResponse);

@@ -211,7 +211,7 @@ const Profile = ({navigation}) => {
       CustMaritalStatusID:Status
     };
     
-   
+    console.log("Profile - Update Profile Payload:", payload);
     const response = await dispatch(UpdateProfileThunk({payload})); 
    
     if (response.payload.ResultMsg == 'Success') {

@@ -43,7 +43,7 @@ const Discount = ({route}) => {
         CustID:custId, 
         DevID:deviceId
       };
-     
+      console.log("Discount - Get Discount Payload:", payload);
       await dispatch(GetDiscountThunk({payload}));
     };
 

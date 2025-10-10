@@ -142,8 +142,8 @@ const Login = ({ navigation }) => {
   useEffect(() => {
     const fetchDeviceId = async () => {
       const id = await DeviceInfo.getUniqueId();
-
       setDeviceId(id);
+      console.log("Login - Device ID Fetched:", id);
     };
     fetchDeviceId();
   }, []);
@@ -177,7 +177,7 @@ const Login = ({ navigation }) => {
       DevID: deviceId,
     };
 
-
+    console.log("Login - Login Payload:", payload);
     const response = dispatch(LoginThunk({ payload, navigation, resetFormLogin }));
   };
 
@@ -206,8 +206,7 @@ const Login = ({ navigation }) => {
       const payload = {
             DevID: deviceId,  
       }
-
-       console.log("Biometric Login Payload:", payload);
+      console.log("Login - Biometric Payload:", payload);
           const response = dispatch(biometricLoginThunk({ payload, navigation }));
       // Alert.alert('Success', 'Biometric authentication successful!');
       // navigation.navigate('Main')
@@ -259,7 +258,7 @@ const Login = ({ navigation }) => {
       GenderID: jantina
     };
 
-
+    console.log("Login - Register Payload:", payload);
     const response = dispatch(RegisterThunk({ payload, resetFormRegistration }));
 
 
@@ -273,6 +272,7 @@ const Login = ({ navigation }) => {
   const CheckLogin = async (username) => {
     if (username) {
       const payload = { NewLoginID: username };
+      console.log("Login - Check Login Payload:", payload);
       const response = await dispatch(CheckNewLoginIdThunk({ payload }));
       console.log("Response :: " + JSON.stringify(response));
       if (response.payload.API_Result_ID === 0) {
@@ -286,6 +286,7 @@ const Login = ({ navigation }) => {
   const CheckIC = async (IC) => {
     if (IC) {
       const payload = { Cust_IC_No: IC };
+      console.log("Login - Check IC Payload:", payload);
       const response = await dispatch(CheckIcThunk({ payload }));
 
       if (response.payload.API_Result_ID === 0) {
@@ -298,6 +299,7 @@ const Login = ({ navigation }) => {
   const CheckPhone = async (Phone) => {
     if (Phone) {
       const payload = { CustHPNo: Phone };
+      console.log("Login - Check Phone Payload:", payload);
       const response = await dispatch(CheckPhoneThunk({ payload }));
 
       if (response.payload.API_Result_ID === 0) {
@@ -309,6 +311,7 @@ const Login = ({ navigation }) => {
   const CheckEmail = async (email) => {
     if (email) {
       const payload = { CustEmail: email };
+      console.log("Login - Check Email Payload:", payload);
       const response = await dispatch(CheckEmailThunk({ payload }));
 
 

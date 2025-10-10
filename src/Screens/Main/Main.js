@@ -7,7 +7,7 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import BottomTabBarNavigator from '../../component/BottomTabBarNavigator';
 import { Divider, Modal, PaperProvider, Portal } from 'react-native-paper';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -34,7 +34,13 @@ const Main = ({ navigation }) => {
   const [timestamp, setTimestamp] = useState(Date.now());
   const [countdown, setCountdown] = useState(10);
   const profileImage = useSelector(state => state.login.profileImage);
-  const totp = new TOTP();
+  const backendTotpMs = loginData?.TOTPSeconds;
+  const periodSeconds = useMemo(() => {
+    const ms = typeof backendTotpMs === 'number' ? backendTotpMs : 30000;
+    const seconds = Math.floor(ms / 1000);
+    return seconds > 0 ? seconds : 30;
+  }, [backendTotpMs]);
+  const totp = useMemo(() => new TOTP(periodSeconds), [periodSeconds]);
   const secret = "JBSWY3DPEHPK3PXP";
 
   const colorScheme = useColorScheme();
@@ -52,6 +58,7 @@ const Main = ({ navigation }) => {
       CustName: '',
       cIC: '',
     };
+    console.log("Main - Customer Profile Payload:", payload);
     const response = await dispatch(GetCustomerProfileThunk({ payload }));
   };
 
@@ -80,7 +87,7 @@ const Main = ({ navigation }) => {
         const newTotpCode = totp.getOtp(secret, newTimestamp).toString();
         setTimestamp(newTimestamp);
         setTotpCode(newTotpCode);
-        setCountdown(60);
+        setCountdown(periodSeconds);
       };
 
       generateTotp(); 
@@ -89,7 +96,7 @@ const Main = ({ navigation }) => {
         setCountdown(prevCountdown => {
           if (prevCountdown === 1) {
             generateTotp();
-            return 60;
+            return periodSeconds;
           }
           return prevCountdown - 1;
         });
@@ -101,7 +108,7 @@ const Main = ({ navigation }) => {
         clearInterval(intervalId); 
       }
     };
-  }, [isModalVisible]);
+  }, [isModalVisible, periodSeconds]);
 
   const renderQRCode = () => {
     const data = {

@@ -86,6 +86,7 @@ const Dashboard = ({ navigation }) => {
       CustName: "",
       cIC: "",
     };
+    console.log("Dashboard - Customer Profile Payload:", payload);
     try {
       const response = await dispatch(GetCustomerProfileThunk({ payload }));
       if (response) {
@@ -108,6 +109,7 @@ const Dashboard = ({ navigation }) => {
     const payload = {
       CustId: custId,
     };
+    console.log("Dashboard - Campaigns Payload:", payload);
     try {
       const resp = await dispatch(getSubCampaignsThunk({ payload }));
       if (resp && resp.payload) {
@@ -150,6 +152,7 @@ const Dashboard = ({ navigation }) => {
       CustId: custId,
       CampaignID: CampaignID
     };
+    console.log("Dashboard - Handle Navigation Payload:", payload);
     const resp = await dispatch(getCampaignsThunk({ payload }));
     if (resp && resp.payload && resp.payload[0]?.CampaignID > 0) {
       navigation.navigate('campaigns')
@@ -163,24 +166,21 @@ const Dashboard = ({ navigation }) => {
     const fetchDeviceId = async () => {
       const id = await DeviceInfo.getUniqueId();
       setDeviceId(id);
+      console.log("Dashboard - Device ID Set:", id);
       const version = await DeviceInfo.getVersion();
       setAppVersion(version);
       const appName = await DeviceInfo.getApplicationName();
       setAppName(appName);
+      
+      // Call APIs with the deviceId directly
+      await getCustomerProfile();
+      await getNotification(id);
+      await getPromo();
+      await getBanner();
+      await getNotificationCount(id);
+      await VersionLog(id); // Add VersionLog call
     };
     fetchDeviceId();
-    // checkDeviceID();
-
-    // if (deviceId !== ProfileData[0]?.DevID) {
-    //   Alert.alert("Peranti ini tidak berdaftar");
-    // }
-    // Set a timer to call checkDeviceID after 5 seconds
-    // const timer = setTimeout(() => {
-    //   checkDeviceID();
-    // }, 3000); ProfileData
-
-    // return () => clearTimeout(timer);
-
   }, []);
 
   const checkDeviceID = () => {
@@ -190,31 +190,33 @@ const Dashboard = ({ navigation }) => {
     }
   };
   // console.log("ProfileData DEVIDtest---", deviceId !== ProfileData[0]?.DevID);
-   console.log("deviceId", deviceId);
+  // console.log("deviceId", deviceId);
   // console.log("ProfileDataDevID", ProfileData[0]?.DevID);
 
   // Notifation api call
-  const getNotification = async () => {
+  const getNotification = async (devId = deviceId) => {
     const custId = await getData("CustId");
 
     const payload = {
       CustID: custId,
-      DevID: deviceId,
+      DevID: devId,
     };
    
-    console.log("payloadNotification", payload);
+   console.log("Dashboard - Notification Payload:", payload);
     const response = await dispatch(GetNotifiationThunk({ payload }));
      //console.log("notification data:", response);
   };
 
   //notification count api call
-  const getNotificationCount = async () => {
+  const getNotificationCount = async (devId = deviceId) => {
     const custId = await getData("CustId");
 
     const payload = {
       CustID: custId,
-      DevID: deviceId,
+      DevID: devId,
     };
+
+    console.log("Dashboard - Notification Count Payload:", payload);
     await dispatch(GetNotifiationCountThunk({ payload }));
 
   };
@@ -224,6 +226,7 @@ const Dashboard = ({ navigation }) => {
     const payload = {
       CustId: custId,
     };
+    console.log("Dashboard - Promo Payload:", payload);
     dispatch(GetPromoThunk({ payload }));
   };
 
@@ -234,20 +237,22 @@ const Dashboard = ({ navigation }) => {
       const payload = {
         CustId: custId,
       };
+      console.log("Dashboard - Banner Payload:", payload);
       dispatch(GetBannerThunk({ payload }));
     } catch (error) {
       // console.log(error, "getBannerError");
     }
   };
 
-  const VersionLog = async () => {
+  const VersionLog = async (devId = deviceId) => {
     const custId = await getData("CustId");
     const payload = {
       CustID: custId,
-      DevID: deviceId,
+      DevID: devId,
       HPVerNo: "2.1",
     };
     console.log(payload);
+    console.log("Dashboard - Version Log Payload:", payload);
     const res = await dispatch(VersionLogThunk({ payload }));
     console.log("Version Log :: " + JSON.stringify(res));
     if (res.payload.DeCart_Ver != "2.1") {
@@ -258,17 +263,11 @@ const Dashboard = ({ navigation }) => {
   const onRefresh = async () => {
     setRefreshing(true);
     await getCustomerProfile();
-    await VersionLog();
+    await VersionLog(deviceId);
     setRefreshing(false);
   };
 
-  useEffect(() => {
-    getCustomerProfile();
-    getNotification();
-    getPromo();
-    getBanner();
-    getNotificationCount();
-  }, [loginData]);
+  // Removed duplicate useEffect - APIs are now called in fetchDeviceId
 
   useEffect(() => {
     if (isFocused && ProfileData[0]?.BioYN === 1 && !hasShownAlert) {
@@ -276,6 +275,27 @@ const Dashboard = ({ navigation }) => {
       getCampaigns()
     }
   }, [isFocused, ProfileData]);
+
+  // Add additional API calls to ensure all APIs are triggered
+  useEffect(() => {
+    const triggerAllAPIs = async () => {
+      console.log("Dashboard - Triggering all APIs for payload verification");
+      
+      // Trigger GetSubCampaigns if not already called
+      if (ProfileData && ProfileData.length > 0) {
+        const custId = await getData("CustId");
+        const campaignsPayload = {
+          CustId: custId,
+        };
+        console.log("Dashboard - GetSubCampaigns Payload:", campaignsPayload);
+        dispatch(getSubCampaignsThunk({ payload: campaignsPayload }));
+      }
+    };
+    
+    if (ProfileData && ProfileData.length > 0) {
+      triggerAllAPIs();
+    }
+  }, [ProfileData]);
 
   const handleModalClose = () => {
     setIsModalVisible(false)

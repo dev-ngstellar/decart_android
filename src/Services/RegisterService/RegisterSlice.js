@@ -12,7 +12,11 @@ const initialState = {
     async action => {
       const {resetFormRegistration, payload} = action;
       try {
+
+      //console.log("Payload sent to RegisterApi ::", payload);
         const response = await RegisterApi(payload);
+
+      //console.log("Response from RegisterApi ::", response.data);
        if(response){
         resetFormRegistration()
         return response.data

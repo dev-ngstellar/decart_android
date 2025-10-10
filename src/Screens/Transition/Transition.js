@@ -47,6 +47,8 @@ const Transition = ({route}) => {
       CustID:custId, 
       DevID:deviceId
     }
+    const id = deviceId || await DeviceInfo.getUniqueId();
+    console.log("Transition - Get Points Payload:", payload);
     await dispatch(GetPointsThunk({payload}));
   };
 
@@ -56,6 +58,7 @@ const Transition = ({route}) => {
       CustID: custId,
       DevID: deviceId,
     };
+    console.log("Transition - Get Sales History Payload:", payload);
     await dispatch(GetSalesHistoryThunk({payload}));
   };
 
@@ -65,6 +68,7 @@ const Transition = ({route}) => {
       CustID: custId,
       DevID: deviceId,
     };
+    console.log("Transition - Get Points History Payload:", payload);
     await dispatch(GetPointHistoryThunk({payload}));
   };
 

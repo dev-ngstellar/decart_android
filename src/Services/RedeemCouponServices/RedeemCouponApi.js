@@ -3,6 +3,8 @@ import { REDEEM_COUPON } from "../../Api/ApiPath";
 
 
 export const RedeemCouponApi = payload => {
+    console.log("API CALL - RedeemCouponApi Payload:", payload);
+    console.log("API CALL - RedeemCouponApi URL:", REDEEM_COUPON);
     const api = API.post(REDEEM_COUPON, payload);
     const response = api.then(res => res.data);
     return response;

@@ -40,8 +40,10 @@ const Coupan = ({navigation,route}) => {
       CustID:custId, 
       DevID:deviceId
     };
+    console.log("Coupon - Get Coupon Payload:", payload);
    const couponRes = await dispatch(GetCouponThunk({payload}));
-  //  console.log("Coupen Result :: "+JSON.stringify(couponRes));
+    console.log("Payload being sent to GetCouponThunk:", payload);
+    console.log("Coupen Result :: "+JSON.stringify(couponRes));
 
   };
   useEffect(()=>{
@@ -72,6 +74,7 @@ const Coupan = ({navigation,route}) => {
        DevID:deviceId,
        CouponCode:couponCode
       }
+      console.log("Coupon - Redeem Coupon Payload:", payload);
       const res =await dispatch(RedeemCouponThunk({payload}));
       if(res && res.payload.APIResult== "Success"){
         Alert.alert(

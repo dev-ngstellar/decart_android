@@ -55,6 +55,7 @@ const Vouchar = ({navigation,route}) => {
       CustID: custId,
       DevID: deviceId,
     };
+    console.log("Voucher - Get Voucher Payload:", payload);
     const res = await dispatch(GetVouchersThunk({payload}));
   };
   useEffect(() => {
@@ -82,7 +83,7 @@ const Vouchar = ({navigation,route}) => {
       DevID: deviceId,
       VoucherCode: voucherCode,
     };
-   
+    console.log("Voucher - Redeem Voucher Payload:", payload);
     const res = await dispatch(RedeemVoucherThunk({payload}));
   
     if (res && res.payload.APIResult == 'Success') {

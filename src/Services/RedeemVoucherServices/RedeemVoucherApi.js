@@ -4,6 +4,8 @@ import { REDEEM_VOUCHER } from "../../Api/ApiPath";
 
 
 export const RedeemVoucherApi = payload => {
+    console.log("API CALL - RedeemVoucherApi Payload:", payload);
+    console.log("API CALL - RedeemVoucherApi URL:", REDEEM_VOUCHER);
     const api = API.post(REDEEM_VOUCHER, payload);
     const response = api.then(res => res.data);
     return response;

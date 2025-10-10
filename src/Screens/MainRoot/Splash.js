@@ -27,6 +27,7 @@ const Splash = ({navigation}) => {
   const fetchDeviceId = async () => {
     const id = await DeviceInfo.getUniqueId();
     setDeviceId(id);
+    console.log("Splash - Device ID Fetched:", id);
   };
   
   const navigate = async () => {
@@ -43,6 +44,7 @@ const Splash = ({navigation}) => {
     const payload = {
       DevID: deviceId,
     };
+   console.log("Splash - DeviceLog Payload:", payload); 
    await dispatch(DeviceLogThunk({payload}));
   };
    useEffect(() => {

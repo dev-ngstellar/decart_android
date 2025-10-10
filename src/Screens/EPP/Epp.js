@@ -40,6 +40,7 @@ const Epp = ({navigation}) => {
       CustID: custId,
       DevID: deviceId,
     };
+    console.log("EPP - Get Baki Payload:", payload);
     await dispatch(GetBakiThunk({payload}));
   };
   useEffect(()=>{
