@@ -10,4 +10,3 @@ export const GetBakiApi = payload => {
     const response = api.then(res => res.data);
     return response;
   };
-  

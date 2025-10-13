@@ -243,22 +243,34 @@ const Dashboard = ({ navigation }) => {
       // console.log(error, "getBannerError");
     }
   };
-
-  const VersionLog = async (devId = deviceId) => {
+    const VersionLog = async (devId = deviceId) => {
+    const APP_VERSION = DeviceInfo.getVersion();
     const custId = await getData("CustId");
     const payload = {
       CustID: custId,
       DevID: devId,
-      HPVerNo: "2.1",
+      HPVerNo: APP_VERSION,
     };
     console.log(payload);
     console.log("Dashboard - Version Log Payload:", payload);
     const res = await dispatch(VersionLogThunk({ payload }));
     console.log("Version Log :: " + JSON.stringify(res));
-    if (res.payload.DeCart_Ver != "2.1") {
-      Alert.alert(res.payload.API_Result);
+    const backendVersion = res?.payload?.DeCart_Ver;
+    const message = res?.payload?.API_Result;
+    console.log("Local App Version:", APP_VERSION);
+    console.log("Backend App Version:", backendVersion);
+
+    // ✅ If version is not latest → show popup
+    if (backendVersion && backendVersion !== APP_VERSION) {
+      Alert.alert(
+        "New update available... please update the app",
+        message || `A new version (${backendVersion}) of the app is available.`,
+        [{ text: "OK" }]
+      );
+    } else {
+      console.log("App is up to date.");
     }
-  };
+};
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -565,6 +577,7 @@ const Dashboard = ({ navigation }) => {
   );
 };
 0;
+export const APP_VERSION = "2.1";
 export default Dashboard;
 
 const styles = StyleSheet.create({

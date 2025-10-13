@@ -8,6 +8,7 @@ import logo3 from '../../Assets/LOGO/terms.png'
 import logo4 from '../../Assets/LOGO/privacy.png'
 import logo5 from '../../Assets/LOGO/FAQs.png'
 import backdrop from '../../Assets/LOGO/backdrop.jpg'
+import { APP_VERSION } from '../Dashboard/Dashboard'
 
 const Info = ({navigation}) => {
   return (
@@ -39,7 +40,7 @@ const Info = ({navigation}) => {
 <Text style={{fontSize:16,color:'white',marginLeft:10}}>FAQs</Text>
 <Image source={logo5} style={{height:35,width:35,marginRight:15}} />
 </TouchableOpacity>
-<Text style={{fontSize:16,color:"black",textAlign:'right',marginRight:10,marginTop:20}}>v1.3</Text>
+<Text style={{fontSize:16,color:"black",textAlign:'right',marginRight:10,marginTop:20}}>v{APP_VERSION}</Text>
         </View>
         </ImageBackground>
     </SafeAreaView>

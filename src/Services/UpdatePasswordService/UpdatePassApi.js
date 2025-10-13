@@ -3,6 +3,7 @@ import { UPDATE_PASSWORD } from "../../Api/ApiPath";
 
 export const UpdatePassApi = payload => {
     const api = API.post(UPDATE_PASSWORD, payload);
+    //console.log("API CALL - update_password Payload:", payload);
     const response = api.then(res => res.data);
     return response;
   };

@@ -12,7 +12,7 @@ import {getData} from '../../Utils/localHelper';
 import { useDispatch, useSelector } from 'react-redux';
 import DeviceInfo from 'react-native-device-info';
 import { DeviceLogThunk, GetDeviceLogThunk } from '../../Services/DeviceLogService/DeviceSlice';
-
+import { APP_VERSION } from '../Dashboard/Dashboard';
 
 const Splash = ({navigation}) => {
   const [deviceId, setDeviceId] = useState("");
@@ -71,7 +71,7 @@ const Splash = ({navigation}) => {
       </View>
       <View style={{justifyContent:"flex-end",alignItems:'flex-end',marginRight:20}}>
         <Text style={{color:'red'}}>*Powered by PERNAMA</Text>
-        <Text style={{color:'red',}}>v1.3</Text>
+        <Text style={{ color: 'red' }}>v{APP_VERSION}</Text>
 
       </View>
     </SafeAreaView>

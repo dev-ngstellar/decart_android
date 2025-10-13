@@ -39,7 +39,7 @@ const Notification = () => {
   const { ProfileData } = state.getCustomerProfile;
 
   const [deviceId, setDeviceId] = useState("");
-  const [profileDevId, setProfileDevId] = useState(null);
+  const [profile , setProfileDevId] = useState(null);
   const [isDeviceRegistered, setIsDeviceRegistered] = useState(false);
 
   useEffect(() => {

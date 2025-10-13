@@ -47,6 +47,7 @@ import { CheckPhoneThunk } from '../../Services/CheckPhoneService/CheckPhoneSlic
 import { CheckEmailThunk } from '../../Services/CheckEmailService/CheckEmailSlice';
 import Loader from '../../component/Loader';
 import ReactNativeBiometrics from 'react-native-biometrics';
+import { APP_VERSION } from '../Dashboard/Dashboard';
 
 const loginValidationSchema = yup.object().shape({
   // pengguna: yup.string().required('*Id Pengguna diperlukan'),
@@ -904,8 +905,7 @@ const Login = ({ navigation }) => {
       </View>
       <View style={{ justifyContent: "flex-end", alignItems: 'flex-end', marginRight: 20 }}>
         <Text style={{ color: 'red' }}>*Powered by PERNAMA</Text>
-        <Text style={{ color: 'red', }}>v1.3</Text>
-
+        <Text style={{ color: 'red', }}>v{APP_VERSION}</Text>
       </View>
     </SafeAreaView>
   );
