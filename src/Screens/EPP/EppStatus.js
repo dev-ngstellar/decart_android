@@ -22,25 +22,36 @@ const EppStatus = () => {
           <Text style={{fontSize:18,color:"#292A60",fontWeight:'400'}}>Baki EPP</Text>
         </View>
         {/* <ScrollView> */}
-    <ScrollView> 
-  { GetBakiData && GetBakiData.map((data,index)=>{
-    return(
-     <View key={index} style={{height:120,width:"95%",borderBottomWidth:0.5,marginHorizontal:'3%',flexDirection:'row',justifyContent:'space-around'}}>
-     <View style={{width:"70%",height:'100%',justifyContent:'space-around'}}>
-       <Text style={{fontSize:16,color:textColor}}>Tarikh:</Text>
-       <Text style={{fontSize:16,color:textColor}}>No Perjanjian:</Text>
-       <Text style={{fontSize:16,color:textColor}}>Baki Epp:</Text>
-       <Text style={{fontSize:16,color:textColor}}>Jangkaan Tarikh Akhir Ansuran:</Text>
-     </View>
-     <View style={{width:"30%",height:'100%',justifyContent:'space-around',alignItems:"flex-end"}}>
-     <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>{data.AgrmDate.split(" ")[0]}</Text>
-       <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>{data.AgrmNo}</Text>
-       <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>RM {data.BalAmt.toLocaleString()}</Text>
-       <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>{data.EstEndDate}</Text>
-     </View>
-   </View>)
-  }) }
-  <View style={{height:200}}></View>
+    <ScrollView>
+      {GetBakiData && GetBakiData.length > 0 ? (
+        GetBakiData.map((data, index) => {
+          return (
+            <View
+              key={index}
+              style={{height:120,width:"95%",borderBottomWidth:0.5,marginHorizontal:'3%',flexDirection:'row',justifyContent:'space-around'}}>
+              <View style={{width:"70%",height:'100%',justifyContent:'space-around'}}>
+                <Text style={{fontSize:16,color:textColor}}>Tarikh:</Text>
+                <Text style={{fontSize:16,color:textColor}}>No Perjanjian:</Text>
+                <Text style={{fontSize:16,color:textColor}}>
+                  Baki EPP {data && data.AgrmDate ? `(${data.AgrmDate.split(" ")[0]})` : ''}:
+                </Text>
+                <Text style={{fontSize:16,color:textColor}}>Jangkaan Tarikh Akhir Ansuran:</Text>
+              </View>
+              <View style={{width:"30%",height:'100%',justifyContent:'space-around',alignItems:"flex-end"}}>
+                <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>{data.AgrmDate.split(" ")[0]}</Text>
+                <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>{data.AgrmNo}</Text>
+                <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>RM {data.BalAmt.toLocaleString()}</Text>
+                <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>{data.EstEndDate}</Text>
+              </View>
+            </View>
+          )
+        })
+      ) : (
+        <View style={{height:200, width:'100%', justifyContent:'center', alignItems:'center'}}>
+          <Text style={{fontSize:16, color:textColor}}>Tiada Rekod</Text>
+        </View>
+      )}
+      <View style={{height:200}}></View>
     </ScrollView>
    {/* </ScrollView> */}
    </ImageBackground>

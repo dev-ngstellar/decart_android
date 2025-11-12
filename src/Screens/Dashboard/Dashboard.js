@@ -72,12 +72,12 @@ const Dashboard = ({ navigation }) => {
 
   const Banner = GetBannerData?.data?.map((item) => ({
     uri: `data:image/png;base64,${item.Data}`,
-  }));
+  }));   
 
   const isFocused = useIsFocused();
   UseBackHandler(isFocused);
 
-  const getCustomerProfile = async () => {
+  const getCustomerProfile = async () => { 
     const custId = await getData("CustId");
 
     const payload = {

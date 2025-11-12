@@ -34,18 +34,22 @@ const Epp = ({navigation}) => {
     fetchDeviceId();
   }, [])
   const getBaki = async () => {
-    const custId=await getData("CustId")
+    const custId = await getData("CustId");
   
     const payload = {
       CustID: custId,
       DevID: deviceId,
     };
     console.log("EPP - Get Baki Payload:", payload);
-    await dispatch(GetBakiThunk({payload}));
+    return dispatch(GetBakiThunk({payload}));
   };
   useEffect(()=>{
-    getBaki()
-  },[])
+    // Only call getBaki after deviceId has been fetched to ensure DevID is populated
+    if (deviceId) {
+      // initial fetch (optional)
+      getBaki();
+    }
+  },[deviceId])
   return (
     <SafeAreaView style={{flex: 1}}>
       <Header Screen="EPP" />
@@ -71,7 +75,13 @@ const Epp = ({navigation}) => {
             flexDirection: 'row',
           }}
          
-          onPress={() => {
+          onPress={async () => {
+            // ensure data is fetched before navigating so EppStatus has data to display
+            try {
+              await getBaki();
+            } catch (err) {
+              console.log('Error fetching Baki before navigate', err);
+            }
             navigation.navigate('EppStatus');
           }}
           >

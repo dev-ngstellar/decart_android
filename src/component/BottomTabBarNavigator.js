@@ -279,14 +279,6 @@ const BottomTabBarNavigator = ({ setModalVisible }) => {
       <Tab.Screen
         name="Epp"
         component={EppStack}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            if (ProfileData[0]?.SerNo === "") {
-              e.preventDefault();
-              Alert.alert('Tiada Rekod');
-            }
-          },
-        })}
         options={{
           headerShown: false,
           tabBarIcon: (tabInfo) => (

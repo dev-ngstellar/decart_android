@@ -85,10 +85,7 @@ export const LoginThunk = createAsyncThunk(
 
                           await storeData('CustId', response.data.CustId.toString());
                           await storeData('token', response.token);
-                          // Clear local data to avoid conflicts
-                          //await clearData();
-                          //console.log("Local data cleared after device change.");
-
+                         
                           resetFormLogin();
                           navigation.navigate('Main');
                         } catch (err) {
@@ -98,7 +95,20 @@ export const LoginThunk = createAsyncThunk(
                     },
                     {
                       text: "No / Tidak",
-                      onPress: () => console.log("User cancelled making this main device"),
+                      onPress: async () => {
+                        try {
+                          await clearData();
+                          console.log("All local data cleared");
+                          dispatch(clearLoginData());
+                          resetFormLogin();
+                          navigation.navigate('Login');
+                        } catch (err) {
+                          console.log("Error clearing data:", err);
+                          dispatch(clearLoginData());
+                          resetFormLogin();
+                          navigation.navigate('Login');
+                        }
+                      },
                       style: "cancel",
                     },
                   ],
@@ -158,7 +168,18 @@ export const biometricLoginThunk = createAsyncThunk(
               await storeData('token', response.token);
               navigation.navigate('Main');
             }},
-            {text: 'Tidak', onPress: () => console.log('dismissing alert'), style: 'cancel'}
+            {text: 'Tidak', onPress: async () => {
+              try {
+                await clearData();
+                console.log("All local data cleared");
+                dispatch(clearLoginData());
+                navigation.navigate('Login');
+              } catch (err) {
+                console.log("Error clearing data:", err);
+                dispatch(clearLoginData());
+                navigation.navigate('Login');
+              }
+            }, style: 'cancel'}
           ],
           { cancelable: false }
         )
@@ -185,6 +206,11 @@ const LoginSlice = createSlice({
     setIsLoading: (state, action) => {
       state.isLoader = action.payload;
     },
+    clearLoginData: (state) => {
+      state.loginData = [];
+      state.profileImage = '';
+      state.biometricLoginData = [];
+    },
   },
   extraReducers: builder => {
     builder.addCase(LoginThunk.fulfilled, (state, action) => {
@@ -196,5 +222,5 @@ const LoginSlice = createSlice({
   },
 });
 
-export const { setProfileImage, setIsLoading } = LoginSlice.actions;
+export const { setProfileImage, setIsLoading, clearLoginData } = LoginSlice.actions;
 export default LoginSlice.reducer;

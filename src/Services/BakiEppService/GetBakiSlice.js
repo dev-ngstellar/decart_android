@@ -10,6 +10,8 @@ export const GetBakiThunk = createAsyncThunk('getBaki', async (action,{dispatch}
   dispatch(setIsLoading(true));
   try {
     const response = await GetBakiApi(action.payload);
+    console.log('GetBaki API response:', response);
+    console.log('GetBaki API data array:', response.data);
     dispatch(setIsLoading(false))
     return response.data;
   } catch (error) {

@@ -3,10 +3,16 @@ import { BAKI_EPP } from "../../Api/ApiPath";
 
 
 
-export const GetBakiApi = payload => {
-    console.log("API CALL - GetBakiApi Payload:", payload);
-    console.log("API CALL - GetBakiApi URL:", BAKI_EPP);
-    const api = API.post(BAKI_EPP, payload);
-    const response = api.then(res => res.data);
-    return response;
-  };
+export const GetBakiApi = async payload => {
+  console.log("API CALL - GetBakiApi Payload:", payload);
+  console.log("API CALL - GetBakiApi URL:", BAKI_EPP);
+  try {
+    const res = await API.post(BAKI_EPP, payload);
+    console.log('API CALL - GetBakiApi Response status:', res.status);
+    console.log('API CALL - GetBakiApi Response data:', res.data);
+    return res.data;
+  } catch (error) {
+    console.log('API CALL - GetBakiApi Error:', error);
+    throw error;
+  }
+};

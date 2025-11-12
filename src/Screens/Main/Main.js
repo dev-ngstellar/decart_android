@@ -37,7 +37,7 @@ const Main = ({ navigation }) => {
   const backendTotpMs = loginData?.TOTPSeconds;
   const periodSeconds = useMemo(() => {
     const ms = typeof backendTotpMs === 'number' ? backendTotpMs : 30000;
-    const seconds = Math.floor(ms / 1000);
+    const seconds = Math.floor(ms / 1000); 
     return seconds > 0 ? seconds : 30;
   }, [backendTotpMs]);
   const totp = useMemo(() => new TOTP(periodSeconds), [periodSeconds]);
