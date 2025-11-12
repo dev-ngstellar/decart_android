@@ -71,7 +71,7 @@ const Splash = ({navigation}) => {
       </View>
       <View style={{justifyContent:"flex-end",alignItems:'flex-end',marginRight:20}}>
         <Text style={{color:'red'}}>*Powered by PERNAMA</Text>
-        <Text style={{ color: 'red' }}>v{APP_VERSION}</Text>
+        <Text style={{ color: 'red' }}>v{APP_VERSION} </Text>
 
       </View>
     </SafeAreaView>

@@ -263,7 +263,7 @@ const Dashboard = ({ navigation }) => {
     // ✅ If version is not latest → show popup
     if (backendVersion && backendVersion !== APP_VERSION) {
       Alert.alert(
-        "New update available... please update the app",
+        "New update available... please update to the New version 2.1",
         message || `A new version (${backendVersion}) of the app is available.`,
         [{ text: "OK" }]
       );
