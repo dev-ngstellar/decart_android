@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   useColorScheme,
+  AppState,
 } from 'react-native';
 import React, { useEffect, useState, useMemo } from 'react';
 import BottomTabBarNavigator from '../../component/BottomTabBarNavigator';
@@ -18,9 +19,10 @@ import logo3 from '../../Assets/logo-16.png';
 import DeviceInfo from 'react-native-device-info';
 import { useDispatch, useSelector } from 'react-redux';
 import { GetCustomerProfileThunk } from '../../Services/GetCustomerProfile/CustomerProfileSlice';
-import { getData } from '../../Utils/localHelper';
+import { getData, clearData } from '../../Utils/localHelper';
 import QRCode from 'react-native-qrcode-svg';
 import { TOTP } from '../../Utils/totp';
+import { DeviceLogApi } from '../../Services/DeviceLogService/DeviceApi';
 
 const Main = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -78,6 +80,8 @@ const Main = ({ navigation }) => {
     fetchDeviceId();
     getCustomerProfile();
   }, []);
+
+
 
   useEffect(() => {
     let intervalId;

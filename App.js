@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, AppState} from 'react-native';
 // import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
@@ -18,70 +18,117 @@ import UserIdValidation from './src/Screens/Login/UserIdValidation';
 import UsernameChange from './src/Screens/Login/UsernameChange';
 import Privacypolicy from './src/Screens/Settings/Privacypolicy';
 import TermsAndConditions from './src/Screens/Settings/TermsAndConditions';
+import { navigationRef, reset } from './src/Utils/NavigationService';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
-import React, {useEffect, useState} from 'react';
-import logo from './src/Assets/logo-1.png';
-import {getData} from './src/Utils/localHelper';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useEffect, useRef} from 'react';
+import {clearData, getData} from './src/Utils/localHelper';
 import DeviceInfo from 'react-native-device-info';
-import { DeviceLogThunk, GetDeviceLogThunk } from './src/Services/DeviceLogService/DeviceSlice';
-import { useNavigation } from '@react-navigation/native';
 import Campaigns from './src/Screens/Dashboard/Campaigns';
+import { CustomerProfileApi } from './src/Services/GetCustomerProfile/CustomerProfileApi';
 
 const Stack = createNativeStackNavigator();
 const App = () => {
-  // const dispatch = useDispatch();
-  // const [deviceId, setDeviceId] = useState("");
-  // const navigation = useNavigation();
- 
+  const isLoggingOutRef = useRef(false);
 
-  // const state = useSelector(state => state);
-  // const {DeviceLogData} = state.deviceLog;
- 
+  const isDeviceSessionInvalid = data => {
+    if (!data) return false;
 
-  // const fetchDeviceId = async () => {
-  //   const id = await DeviceInfo.getUniqueId();
-  //   setDeviceId(id);
-  // };
-  
-  // const navigate = async () => {
-  //   const token = await getData("token");
-  //   if (token) {
-  //     navigation.push("Main");
-  //   } else {
-  //     navigation.navigate("Login");
-  //   }
-  // };
+    // Check specific IDs that usually indicate failure or device mismatch
+    if (
+      data.ApiResultID === 2 || data.ApiResultID === -1 || data.ApiResultID === 0 ||
+      data.API_Result_ID === 2 || data.API_Result_ID === -1 || data.API_Result_ID === 0 ||
+      data.ApiResultID === 3 || data.API_Result_ID === 3
+    ) {
+      return true;
+    }
 
+    // Deep stringify to catch deep messages like 'log masuk di peranti lain'
+    const stringified = JSON.stringify(data).toLowerCase();
 
-  // const getDeviceLog = async () => {
-  //   const payload = {
-  //     DevID: deviceId,
-  //   };
-  //  await dispatch(DeviceLogThunk({payload}));
-  // };
-  //  useEffect(() => {
-  //   fetchDeviceId();
-  //   getDeviceLog()
-  //     setTimeout(() => {
-  //       navigate()
-  //     }, 2000);
-  //   }, []);
+    return (
+      stringified.includes('log masuk') ||
+      stringified.includes('main device') ||
+      stringified.includes('peranti utama') ||
+      stringified.includes('sesi') ||
+      stringified.includes('token expired') ||
+      stringified.includes('invalid_grant')
+    );
+  };
 
-  // // useEffect(() => {
-    
-  // // }, []);
+  const forceLogoutToLogin = async () => {
+    // We do not lock this with a ref, because if clearData succeeds, 
+    // the next poll will exit early due to missing token.
+    console.log('App.js: Invalid device detected. Forcing logout...');
+    await clearData();
+    reset('Login');
+  };
 
-  // // useEffect(()=>{
-   
-  // // },[])
+  useEffect(() => {
+    let pollInterval;
+
+    const checkMainDeviceStatus = async () => {
+      try {
+        const token = await getData('token');
+        const custId = await getData('CustId');
+        
+        if (!token || !custId) {
+          return;
+        }
+
+        const id = await DeviceInfo.getUniqueId();
+        const payload = {
+          CustId: custId,
+          SerNo: '',
+          CustName: '',
+          cIC: '',
+        };
+
+        const response = await CustomerProfileApi(payload);
+
+        // If backend explicitly invalidates the response wrapper
+        if (isDeviceSessionInvalid(response)) {
+          await forceLogoutToLogin();
+          return;
+        }
+
+        // It might be { data: [...] } or just [...]
+        const dataArr = response?.data || response;
+
+        // Check if the current device matches the registered main device
+        if (Array.isArray(dataArr) && dataArr.length > 0) {
+          const profile = dataArr[0];
+          if (profile.RegDevID && String(profile.RegDevID) !== String(id)) {
+            console.log("App.js: Device mismatch detected! Backend RegDevID:", profile.RegDevID, "Current:", id);
+            await forceLogoutToLogin();
+          }
+        }
+      } catch (error) {
+        // Ignore transient network/API failures.
+      }
+    };
+
+    checkMainDeviceStatus();
+
+    const appStateSubscription = AppState.addEventListener(
+      'change',
+      nextAppState => {
+        if (nextAppState === 'active') {
+          checkMainDeviceStatus();
+        }
+      },
+    );
+
+    return () => {
+      appStateSubscription.remove();
+    };
+  }, []);
 
 
   return (
     <Provider store={store}>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <Stack.Navigator>
           <Stack.Screen
             name="Splash"
