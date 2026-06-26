@@ -33,14 +33,14 @@ const EppStatus = () => {
                 <Text style={{fontSize:16,color:textColor}}>Tarikh:</Text>
                 <Text style={{fontSize:16,color:textColor}}>No Perjanjian:</Text>
                 <Text style={{fontSize:16,color:textColor}}>
-                  Baki EPP {data && data.AgrmDate ? `(${data.AgrmDate.split(" ")[0]})` : ''}:
+                  Baki EPP {data && data.LastUpdatedDate ? `(${data.LastUpdatedDate.split(" ")[0]})` : ''}:
                 </Text>
                 <Text style={{fontSize:16,color:textColor}}>Jangkaan Tarikh Akhir Ansuran:</Text>
               </View>
               <View style={{width:"30%",height:'100%',justifyContent:'space-around',alignItems:"flex-end"}}>
                 <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>{data.AgrmDate.split(" ")[0]}</Text>
                 <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>{data.AgrmNo}</Text>
-                <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>RM {data.BalAmt.toLocaleString()}</Text>
+                <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>RM {Number(data.BalAmt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</Text>
                 <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>{data.EstEndDate}</Text>
               </View>
             </View>

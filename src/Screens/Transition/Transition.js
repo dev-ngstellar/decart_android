@@ -23,7 +23,16 @@ const Transition = ({route}) => {
   const {SalesHistoryData} = state.getSalesHistory;
 
   const tableHead = ['Tarikh luput mata', 'Mata Ganjaran'];
-  const tableData = PointsHistoryData?.map(history => [history.ExpPeriod, history.Points]);
+  const tableData = PointsHistoryData?.map(history => {
+    const points = history.Points;
+    const isNegative = Number(points) < 0;
+    const displayPoints = isNegative ? (
+      <Text style={[styles.tableCellText, { color: 'red' }]}>({Math.abs(points)})</Text>
+    ) : (
+      points
+    );
+    return [history.ExpPeriod, displayPoints];
+  });
 
   const colorScheme = useColorScheme();
   const lightModeTextColor = 'grey';

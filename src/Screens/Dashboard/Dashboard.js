@@ -112,7 +112,10 @@ const Dashboard = ({ navigation }) => {
     console.log("Dashboard - Campaigns Payload:", payload);
     try {
       const resp = await dispatch(getSubCampaignsThunk({ payload }));
-      if (resp && resp.payload) {
+      console.log("Dashboard - GetSubCampaigns Response:", JSON.stringify(resp.payload));
+      
+      // Only show the modal if there's a valid campaign with CampaignID > 0
+      if (resp && resp.payload && resp.payload.length > 0 && resp.payload[0]?.CampaignID > 0) {
         setIsModalVisible(true)
       }
     } catch (error) {
@@ -156,10 +159,10 @@ const Dashboard = ({ navigation }) => {
     const resp = await dispatch(getCampaignsThunk({ payload }));
     if (resp && resp.payload && resp.payload[0]?.CampaignID > 0) {
       navigation.navigate('campaigns')
-    }{
+      setIsModalVisible(false)
+    } else {
       setIsModalVisible(false)
     }
-
   }
 
   useEffect(() => {
