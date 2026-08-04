@@ -54,11 +54,11 @@ const Dashboard = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [hasShownAlert, setHasShownAlert] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const state = useSelector((state) => state);
-  const { loginData } = state.login;
-  const { ProfileData } = state.getCustomerProfile;
+  const loginData = useSelector((state) => state.login.loginData);
+  const ProfileData = useSelector((state) => state.getCustomerProfile.ProfileData);
   const isLoader = useSelector((state) => state.login.isLoader);
-  const { NotifiationData, GetNotificationCountData } = state.getNotifiation;
+  const NotifiationData = useSelector((state) => state.getNotifiation.NotifiationData);
+  const GetNotificationCountData = useSelector((state) => state.getNotifiation.GetNotificationCountData);
   const profileImage = useSelector((state) => state.login.profileImage);
   const VersionLogData = useSelector((state) => state.deviceLog.VersionLogData);
 
@@ -509,7 +509,7 @@ const Dashboard = ({ navigation }) => {
         />
         <View style={{ height: "35%", width: "100%" }}>
           <Carousel
-            data={Banner}
+            data={Banner || []}
             renderItem={renderItem}
             sliderWidth={viewportWidth}
             itemWidth={viewportWidth}
@@ -540,7 +540,7 @@ const Dashboard = ({ navigation }) => {
         >
           {/* <Image source={{uri:`data:image/png;base64,${GetPromoData?.images[0]?.Data}`}} style={{height:'100%',width:'100%'}} /> */}
           <Carousel
-            data={promoData}
+            data={promoData || []}
             renderItem={renderPromoItem}
             sliderWidth={viewportWidth}
             itemWidth={viewportWidth}

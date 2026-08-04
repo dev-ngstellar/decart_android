@@ -33,9 +33,8 @@ const Vouchar = ({navigation,route}) => {
    
   
   const dispatch = useDispatch();
-  const state = useSelector(state => state);
   const [refreshing, setRefreshing] = useState(false);
-  const {GetVouchersData} = state.getVouchers;
+  const GetVouchersData = useSelector(state => state.getVouchers.GetVouchersData);
   const isLoader = useSelector(state => state.login.isLoader);
   const colorScheme = useColorScheme();
   const lightModeTextColor = 'grey';

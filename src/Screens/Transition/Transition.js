@@ -9,18 +9,18 @@ import { GetSalesHistoryThunk } from '../../Services/GetSalesHistory/SalesHistor
 import backdrop from '../../Assets/LOGO/backdrop.jpg'
 import Loader from '../../component/Loader';
 import { Table, Row, Rows } from 'react-native-table-component';
+import RewardHistoryTab from './components/RewardHistoryTab';
 
 
 const Transition = ({route}) => {
   // const { deviceId } = route.params;
   const dispatch=useDispatch()
-  const state = useSelector(state => state);
   const [refreshing, setRefreshing] = useState(false);
   const [deviceId, setDeviceId] = useState('');
   const isLoader = useSelector(state => state.login.isLoader);
-  const {PointsData,PointsHistoryData} = state.getPoints;
-
-  const {SalesHistoryData} = state.getSalesHistory;
+  const PointsData = useSelector(state => state.getPoints.PointsData);
+  const PointsHistoryData = useSelector(state => state.getPoints.PointsHistoryData);
+  const SalesHistoryData = useSelector(state => state.getSalesHistory.SalesHistoryData);
 
   const tableHead = ['Tarikh luput mata', 'Mata Ganjaran'];
   const tableData = PointsHistoryData?.map(history => {
@@ -139,6 +139,14 @@ const Transition = ({route}) => {
    
     </ScrollView>
       )
+    } else if (selectedButton === 'History') {
+      return (
+        <RewardHistoryTab
+          deviceId={deviceId}
+          refreshing={refreshing}
+          onRefreshParent={onRefresh}
+        />
+      );
     } else if(selectedButton === 'Sejarah pembelian') {
       return (
         <ScrollView  refreshControl={
@@ -214,12 +222,38 @@ const Transition = ({route}) => {
           ]}
           onPress={() => setSelectedButton('Mata ganjaran')}>
           <Text
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
             style={{
               color: selectedButton === 'Mata ganjaran' ? '#292A60' : 'gray',
-              fontSize: 16,
+              fontSize: 11,
               fontWeight: 'normal',
+              textAlign: 'center',
+              paddingHorizontal: 1,
             }}>
            MATA GANJARAN
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.togglebutton,
+            selectedButton === 'History'
+              ? {backgroundColor: '#DFDFDF'}
+              : {backgroundColor: '#CDCDCD'},
+          ]}
+          onPress={() => setSelectedButton('History')}>
+          <Text
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
+            style={{
+              color: selectedButton === 'History' ? '#292A60' : 'gray',
+              fontSize: 11,
+              fontWeight: 'normal',
+              textAlign: 'center',
+              paddingHorizontal: 1,
+            }}>
+            SEJARAH MATA
           </Text>
         </TouchableOpacity>
 
@@ -232,10 +266,14 @@ const Transition = ({route}) => {
           ]}
           onPress={() => setSelectedButton('Sejarah pembelian')}>
           <Text
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
             style={{
               color: selectedButton === 'Sejarah pembelian' ? '#292A60' : 'gray',
-              fontSize: 16,
+              fontSize: 11,
               fontWeight: 'normal',
+              textAlign: 'center',
+              paddingHorizontal: 1,
             }}>
             SEJARAH PEMBELIAN
           </Text>
@@ -262,7 +300,8 @@ const styles = StyleSheet.create({
   },
   togglebutton: {
     height: 50,
-    width: "49%",
+    flex: 1,
+    paddingHorizontal: 2,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,

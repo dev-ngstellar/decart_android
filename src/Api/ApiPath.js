@@ -5,8 +5,7 @@ export const BASE_URL = "http://115.187.22.233:1588/api/";
 
 export const DEVICE_LOG = BASE_URL + "DeviceLog";
 export const GET_CUSTOMER_TYPES = BASE_URL + "GeTCustomerTypes";
-export const UPDATE_CUSTOMER_REGISTRATION =
-  BASE_URL + "UpdateCustomerRegistration";
+export const UPDATE_CUSTOMER_REGISTRATION = BASE_URL + "UpdateCustomerRegistration";
 export const LOGIN = BASE_URL + "CustomerLogin";
 export const GET_CUSTOMER_PROFILE = BASE_URL + "GetCustomerProfile";
 export const FORGOT_PASSWORD = BASE_URL + "ForgotPassword";
@@ -47,3 +46,4 @@ export const BIOMETRIC_LOGIN = BASE_URL + "BiometricLogin";
 export const GET_CAMPAIGNS = BASE_URL + 'GetCampaigns';
 export const UPDATE_CAMPAIGNS = BASE_URL + 'UpdateCustomerCampaign';
 export const GET_SUB_CAMPAIGNS = BASE_URL + 'GetSubCampaigns'
+export const ARMS_POINTSHISTORY = BASE_URL + 'ARMS_PointsHistory'

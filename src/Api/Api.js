@@ -7,10 +7,10 @@ const API = axios.create({});
 API.interceptors.request.use(
   async config => {
     const token = await getData('token');
-  
-
-    config.headers['Authorization'] = `Bearer ${token}`;
-    
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    config.headers['Content-Type'] = 'application/json';
     return config;
   },
   error => {

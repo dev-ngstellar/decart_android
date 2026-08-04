@@ -32,11 +32,8 @@ const Notification = () => {
   const textColor =
     colorScheme === "dark" ? darkModeTextColor : lightModeTextColor;
 
-  const state = useSelector((state) => state);
-  const { NotifiationData } = state.getNotifiation;
-  // console.log("NotifiationDataList", NotifiationData);
-
-  const { ProfileData } = state.getCustomerProfile;
+  const NotifiationData = useSelector((state) => state.getNotifiation.NotifiationData);
+  const ProfileData = useSelector((state) => state.getCustomerProfile.ProfileData);
 
   const [deviceId, setDeviceId] = useState("");
   const [profile , setProfileDevId] = useState(null);

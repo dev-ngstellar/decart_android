@@ -17,8 +17,7 @@ import closeBtn from '../../Assets/close_button.png'
 const Coupan = ({navigation,route}) => {
   const { deviceId } = route.params;
   const dispatch=useDispatch()
-  const state = useSelector(state => state);
-  const {GetCouponData} = state.getCoupon;
+  const GetCouponData = useSelector(state => state.getCoupon.GetCouponData);
   const isLoader = useSelector(state => state.login.isLoader);
 
 

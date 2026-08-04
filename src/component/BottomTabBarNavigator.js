@@ -221,7 +221,7 @@ const BottomTabBarNavigator = ({ setModalVisible }) => {
       }}
     >
       <Tab.Screen
-        name="Dashboard"
+        name="DashboardTab"
         component={DashboardStack}
         options={{
           headerShown: false,
@@ -277,7 +277,7 @@ const BottomTabBarNavigator = ({ setModalVisible }) => {
         }}
       />
       <Tab.Screen
-        name="Epp"
+        name="EppTab"
         component={EppStack}
         options={{
           headerShown: false,
@@ -293,7 +293,7 @@ const BottomTabBarNavigator = ({ setModalVisible }) => {
         }}
       />
       <Tab.Screen
-        name="Settings"
+        name="SettingsTab"
         component={SettingsStack}
         options={{
           headerShown: false,
