@@ -24,9 +24,8 @@ const RewardHistoryTab = ({ deviceId, refreshing: parentRefreshing, onRefreshPar
       setLoading(true);
       setErrorMsg(null);
 
-      // TODO: TEMPORARY TESTING ONLY - CustId is hardcoded to 4 for testing.
-      // Revert to logged-in user session ID (await getData('CustId')) after backend verification.
-      const custId = 4;
+      // Customer ID retrieved dynamically from user session (AsyncStorage)
+      const custId = await getData('CustId');
 
       // DevID dynamically retrieved using application's DeviceInfo service
       const devId = deviceId || (await DeviceInfo.getUniqueId());
@@ -39,6 +38,7 @@ const RewardHistoryTab = ({ deviceId, refreshing: parentRefreshing, onRefreshPar
 
       console.log('RewardHistoryTab - Fetch Payload:', JSON.stringify(payload));
       const resultAction = await dispatch(GetArmsPointsHistoryThunk(payload));
+      console.log('RewardHistoryTab - Fetch Response:', JSON.stringify(resultAction));
       
       if (GetArmsPointsHistoryThunk.rejected.match(resultAction)) {
         const message = resultAction.payload || 'Unable to load history.';
