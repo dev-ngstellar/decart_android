@@ -17,19 +17,16 @@ const RewardHistoryRow = ({ item, isLast }) => {
 
   return (
     <View style={[styles.row, isLast && { borderBottomWidth: 1 }]}>
-      <View style={[styles.cell, { width: '19%' }]}>
+      <View style={[styles.cell, { width: '25%' }]}>
         <Text style={styles.cellText} numberOfLines={1} adjustsFontSizeToFit={true}>{dateDisplay}</Text>
       </View>
-      <View style={[styles.cell, { width: '22%' }]}>
+      <View style={[styles.cell, { width: '25%' }]}>
         <Text style={styles.cellText} numberOfLines={1}>{earnedDisplay}</Text>
       </View>
-      <View style={[styles.cell, { width: '21%' }]}>
+      <View style={[styles.cell, { width: '25%' }]}>
         <Text style={styles.cellText} numberOfLines={1}>{redeemedDisplay}</Text>
       </View>
-      <View style={[styles.cell, { width: '19%' }]}>
-        <Text style={styles.cellText} numberOfLines={1}>{balanceDisplay}</Text>
-      </View>
-      <View style={[styles.cell, { width: '19%', borderRightWidth: 0 }]}>
+      <View style={[styles.cell, { width: '25%', borderRightWidth: 0 }]}>
         <Text style={styles.cellText} numberOfLines={1} adjustsFontSizeToFit={true}>{expiryDisplay}</Text>
       </View>
     </View>

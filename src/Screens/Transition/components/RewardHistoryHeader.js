@@ -4,19 +4,16 @@ import { View, Text, StyleSheet } from 'react-native';
 const RewardHistoryHeader = () => {
   return (
     <View style={styles.headerRow}>
-      <View style={[styles.headerCell, { width: '19%' }]}>
+      <View style={[styles.headerCell, { width: '25%' }]}>
         <Text style={styles.headerText} numberOfLines={1} adjustsFontSizeToFit={true}>Tarikh</Text>
       </View>
-      <View style={[styles.headerCell, { width: '22%' }]}>
+      <View style={[styles.headerCell, { width: '25%' }]}>
         <Text style={styles.headerText} numberOfLines={1} adjustsFontSizeToFit={true}>Mata Diterima</Text>
       </View>
-      <View style={[styles.headerCell, { width: '21%' }]}>
+      <View style={[styles.headerCell, { width: '25%' }]}>
         <Text style={styles.headerText} numberOfLines={1} adjustsFontSizeToFit={true}>Mata Ditebus</Text>
       </View>
-      <View style={[styles.headerCell, { width: '19%' }]}>
-        <Text style={styles.headerText} numberOfLines={1} adjustsFontSizeToFit={true}>Baki Mata</Text>
-      </View>
-      <View style={[styles.headerCell, { width: '19%', borderRightWidth: 0 }]}>
+      <View style={[styles.headerCell, { width: '25%', borderRightWidth: 0 }]}>
         <Text style={styles.headerText} numberOfLines={1} adjustsFontSizeToFit={true}>Mata Luput</Text>
       </View>
     </View>
