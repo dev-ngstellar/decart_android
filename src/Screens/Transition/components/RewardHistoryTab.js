@@ -91,6 +91,8 @@ const RewardHistoryTab = ({ deviceId, refreshing: parentRefreshing, onRefreshPar
   return (
     <ScrollView
       style={styles.container}
+      contentContainerStyle={{ paddingBottom: 140 }}
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing || Boolean(parentRefreshing)} onRefresh={onRefresh} />
       }

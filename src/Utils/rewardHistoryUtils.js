@@ -23,14 +23,15 @@ export const parseDateTime = (dateStr) => {
 };
 
 /**
- * Format date string to 'DD MMM YYYY' (e.g. 05 Aug 2024)
+ * Format date string to 'DD/MM/YYYY' (e.g. 05/08/2024)
  * @param {string} dateStr 
+ * @param {string} format
  * @returns {string}
  */
-export const formatDate = (dateStr) => {
+export const formatDate = (dateStr, format = 'DD/MM/YYYY') => {
   const parsed = parseDateTime(dateStr);
   if (!parsed) return '-';
-  return moment(parsed).format('DD MMM YYYY');
+  return moment(parsed).format(format);
 };
 
 /**

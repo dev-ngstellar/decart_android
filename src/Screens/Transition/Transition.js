@@ -2,7 +2,7 @@ import { ImageBackground, RefreshControl, SafeAreaView, ScrollView, StyleSheet, 
 import React, { useEffect, useState } from 'react'
 import Header from '../../component/Header';
 import { useDispatch, useSelector } from 'react-redux';
-import { GetPointHistoryThunk, GetPointsThunk } from '../../Services/GetPointsService/GetPointSlice';
+import { GetArmsPointsHistoryThunk, GetPointsThunk } from '../../Services/GetPointsService/GetPointSlice';
 import DeviceInfo from 'react-native-device-info';
 import { getData } from '../../Utils/localHelper';
 import { GetSalesHistoryThunk } from '../../Services/GetSalesHistory/SalesHistorySlice';
@@ -10,55 +10,121 @@ import backdrop from '../../Assets/LOGO/backdrop.jpg'
 import Loader from '../../component/Loader';
 import { Table, Row, Rows } from 'react-native-table-component';
 import RewardHistoryTab from './components/RewardHistoryTab';
+import { formatDate } from '../../Utils/rewardHistoryUtils';
 
 
-const Transition = ({route}) => {
+const Transition = ({ route }) => {
   // const { deviceId } = route.params;
-  const dispatch=useDispatch()
+  const dispatch = useDispatch()
   const [refreshing, setRefreshing] = useState(false);
   const [deviceId, setDeviceId] = useState('');
   const isLoader = useSelector(state => state.login.isLoader);
   const PointsData = useSelector(state => state.getPoints.PointsData);
-  const PointsHistoryData = useSelector(state => state.getPoints.PointsHistoryData);
+  const ArmsPointsHistoryData = useSelector(state => state.getPoints?.ArmsPointsHistoryData);
   const SalesHistoryData = useSelector(state => state.getSalesHistory.SalesHistoryData);
 
-  const tableHead = ['Tarikh luput mata', 'Mata Ganjaran'];
-  const tableData = PointsHistoryData?.map(history => {
-    const points = history.Points;
-    const isNegative = Number(points) < 0;
-    const displayPoints = isNegative ? (
-      <Text style={[styles.tableCellText, { color: 'red' }]}>({Math.abs(points)})</Text>
+  const tableHead = [
+    <Text key="h-date" style={styles.tableHeaderText} numberOfLines={1} adjustsFontSizeToFit>
+      Tarikh luput mata
+    </Text>,
+    <Text key="h-terima" style={styles.tableHeaderText} numberOfLines={1}>
+      Terima
+    </Text>,
+    <Text key="h-tebus" style={styles.tableHeaderText} numberOfLines={1}>
+      Tebus
+    </Text>,
+  ];
+
+  const parseDateTimestamp = dateStr => {
+    if (!dateStr || typeof dateStr !== 'string') return 0;
+    const time = new Date(dateStr).getTime();
+    return isNaN(time) ? 0 : time;
+  };
+
+  const sortedPointsHistory =
+    ArmsPointsHistoryData && Array.isArray(ArmsPointsHistoryData)
+      ? [...ArmsPointsHistoryData].sort((a, b) => {
+          const dateA =
+            (Number(a?.PointsRedeemed) > 0 ? a?.PointsExpiryDate : a?.TransactionDate) ||
+            a?.TransactionDate ||
+            a?.PointsExpiryDate;
+          const dateB =
+            (Number(b?.PointsRedeemed) > 0 ? b?.PointsExpiryDate : b?.TransactionDate) ||
+            b?.TransactionDate ||
+            b?.PointsExpiryDate;
+          return parseDateTimestamp(dateB) - parseDateTimestamp(dateA);
+        })
+      : [];
+
+  const tableData = sortedPointsHistory.map((history, index) => {
+    const earned = Number(history?.PointsEarned ?? 0);
+    const redeemed = Number(history?.PointsRedeemed ?? 0);
+    const isEarned = !isNaN(earned) && earned > 0;
+    const isRedeemed = !isNaN(redeemed) && redeemed > 0;
+
+    // If the value is in terima: display TransactionDate. If tebus: display PointsExpiryDate.
+    const dateRaw = isRedeemed
+      ? history?.PointsExpiryDate
+      : history?.TransactionDate;
+    const dateText = formatDate(dateRaw);
+    const terimaText = isEarned ? `${earned}` : '-';
+
+    const tebusElement = isRedeemed ? (
+      <Text style={[styles.tableCellText, { color: 'red' }]} numberOfLines={1}>
+        ({redeemed})
+      </Text>
     ) : (
-      points
+      <Text style={styles.tableCellText} numberOfLines={1}>
+        -
+      </Text>
     );
-    return [history.ExpPeriod, displayPoints];
+
+    return [
+      <Text key={`date-${index}`} style={styles.tableCellText} numberOfLines={1}>
+        {dateText}
+      </Text>,
+      <Text key={`terima-${index}`} style={styles.tableCellText} numberOfLines={1}>
+        {terimaText}
+      </Text>,
+      tebusElement,
+    ];
   });
 
   const colorScheme = useColorScheme();
   const lightModeTextColor = 'grey';
   const darkModeTextColor = 'black';
   const textColor = colorScheme === 'dark' ? darkModeTextColor : lightModeTextColor;
-  const [selectedButton, setSelectedButton] = useState('Mata ganjaran');
-  
- const TotalAmount = SalesHistoryData?.reduce((sum, item) => sum + item.TotalAmt, 0).toFixed(2);
+  const mode = route?.params?.mode || 'pembelian';
+  const [selectedButton, setSelectedButton] = useState(
+    mode === 'points' ? 'History' : 'Sejarah pembelian'
+  );
 
+  const TotalAmount = SalesHistoryData?.reduce((sum, item) => sum + item.TotalAmt, 0).toFixed(2);
 
- useEffect(() => {
-  const fetchDeviceId = async () => {
-    const id = await DeviceInfo.getUniqueId();
-    setDeviceId(id);
-  };
-  fetchDeviceId();
-}, []);
+  useEffect(() => {
+    if (mode === 'points') {
+      setSelectedButton('History');
+    } else {
+      setSelectedButton('Sejarah pembelian');
+    }
+  }, [mode, route?.params?.timestamp]);
+
+  useEffect(() => {
+    const fetchDeviceId = async () => {
+      const id = route?.params?.deviceId || await DeviceInfo.getUniqueId();
+      setDeviceId(id);
+    };
+    fetchDeviceId();
+  }, [route?.params?.deviceId]);
   const getPoints = async () => {
-    const custId=await getData("CustId")
+    const custId = await getData("CustId")
     const payload = {
-      CustID:custId, 
-      DevID:deviceId
+      CustID: custId,
+      DevID: deviceId
     }
     const id = deviceId || await DeviceInfo.getUniqueId();
     console.log("Transition - Get Points Payload:", payload);
-    await dispatch(GetPointsThunk({payload}));
+    await dispatch(GetPointsThunk({ payload }));
   };
 
   const getSalesHistory = async () => {
@@ -68,225 +134,280 @@ const Transition = ({route}) => {
       DevID: deviceId,
     };
     console.log("Transition - Get Sales History Payload:", payload);
-    await dispatch(GetSalesHistoryThunk({payload}));
+    await dispatch(GetSalesHistoryThunk({ payload }));
   };
 
   const getPointsHistory = async () => {
     const custId = await getData('CustId');
+    const devId = deviceId || (await DeviceInfo.getUniqueId());
     const payload = {
-      CustID: custId,
-      DevID: deviceId,
+      CustId: custId,
+      DevID: devId,
     };
-    console.log("Transition - Get Points History Payload:", payload);
-    await dispatch(GetPointHistoryThunk({payload}));
+    console.log("Transition - Get ARMS Points History Payload:", payload);
+    await dispatch(GetArmsPointsHistoryThunk(payload));
   };
 
 
 
-  useEffect(()=>{
+  useEffect(() => {
     getPoints()
     getSalesHistory()
     getPointsHistory()
-  },[deviceId])
+  }, [deviceId])
 
   const onRefresh = async () => {
     setRefreshing(true);
     await getPoints()
     await getSalesHistory()
-    getPointsHistory()
+    await getPointsHistory()
     setRefreshing(false);
   };
   const renderContent = () => {
-    if (selectedButton === 'Mata ganjaran') {
+    if (mode === 'points') {
+      if (selectedButton === 'Mata ganjaran') {
+        return (
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: 120 }}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }>
+            {sortedPointsHistory && sortedPointsHistory.length > 0 ? (
+              <View style={styles.tableWrapper}>
+                <Table borderStyle={{ borderWidth: 1, borderColor: '#000000' }}>
+                  <Row
+                    data={tableHead}
+                    flexArr={[1.35, 1, 1]}
+                    style={styles.tableHeader}
+                  />
+                  <Rows
+                    data={tableData}
+                    flexArr={[1.35, 1, 1]}
+                    style={styles.tableRow}
+                  />
+                </Table>
+              </View>
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>Tiada maklumat mata luput</Text>
+              </View>
+            )}
+          </ScrollView>
+        );
+      } else if (selectedButton === 'History') {
+        return (
+          <RewardHistoryTab
+            deviceId={deviceId}
+            refreshing={refreshing}
+            onRefreshParent={onRefresh}
+          />
+        );
+      }
+      return null;
+    } else {
       return (
-<ScrollView style={{height:'100%'}} refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh}  />
-        } >
-  <View style={{backgroundColor:'white',height:150}}>
-  {PointsData && PointsData.length > 0 && (
-        PointsData.map((points, index) => (
-          <View key={index} style={styles.card}>
-            <View style={{height:'100%',width:'50%',alignItems:'center',justifyContent:'center'}}>
-            <Text style={{fontSize:28,fontWeight:'800',color:'black'}}>Baki Mata</Text>
-
-            </View>
-            <View style={{height:'100%',width:'50%',alignItems:'center',justifyContent:'center'}}>
-            {/* <Text style={{fontSize:16,fontWeight:'bold',color:'#292A60'}}>Tarikh luput mata</Text>
-            <Text style={{fontSize:14,fontWeight:'500',color:'black'}}>{points.ExpDate}</Text> */}
-                        <Text style={{fontSize:33,fontWeight:'800',color:'brown'}}>{points.Points}</Text>
-            </View>
-          </View>
-        ))
-      )}
-  </View>
-  <ScrollView style={{flex:1}}   >
-  <View style={{height:'75%'}}>
-  {PointsHistoryData && PointsHistoryData.length > 0 && (
-        <View style={{ marginTop: 20 }}>
-          <Table borderStyle={{ borderWidth: 1, borderColor: 'black' }}>
-            <Row data={tableHead} style={styles.tableHeader} textStyle={styles.tableHeaderText} />
-            <Rows data={tableData}style={styles.tableHeader}  textStyle={styles.tableCellText} />
-          </Table>
-        </View>
-      )}
-
-  </View>
-  </ScrollView>
-    
-        
-
-    
-   
-    </ScrollView>
-      )
-    } else if (selectedButton === 'History') {
-      return (
-        <RewardHistoryTab
-          deviceId={deviceId}
-          refreshing={refreshing}
-          onRefreshParent={onRefresh}
-        />
-      );
-    } else if(selectedButton === 'Sejarah pembelian') {
-      return (
-        <ScrollView  refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh}  />
-        }
-        >
-        <View style={{height: 'auto'}}>
-        { SalesHistoryData && SalesHistoryData.map((data,index)=>{
-    return(
-     <View key={index} style={{height:100,width:"95%",borderBottomWidth:0.5,marginHorizontal:'3%',flexDirection:'row',justifyContent:'space-around'}}>
-     <View style={{width:"35%",height:'100%',justifyContent:'space-around'}}>
-       <Text style={{fontSize:16,color:textColor}}>Tarikh:</Text>
-       <Text style={{fontSize:16,color:textColor}}>No Resit:</Text>
-       <Text style={{fontSize:16,color:textColor}}>Nilai Pembelian:</Text>
-     </View>
-     <View style={{width:"70%",height:'100%',justifyContent:'space-around',alignItems:"flex-end"}}>
-     <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>{data.SaleDate}</Text>
-       <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>{data.ResitNo}</Text>
-       <Text style={{fontSize:16,color:textColor,fontWeight:"500"}}>RM {data.TotalAmt.toFixed(2)}</Text>
-     </View>
-   </View>)
-  }) }
-          <View
-            style={{
-              height: 130,
-              width: '95%',
-              marginHorizontal: '3%',
-              justifyContent: 'center',
-              alignItems: 'flex-end',
-            }}>
-            <Text style={{fontSize: 18, fontWeight: 'bold', color: textColor}}>
-              Jumlah Pembelian
-            </Text>
-            <Text
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
+          <View style={{ height: 'auto' }}>
+            {SalesHistoryData &&
+              SalesHistoryData.map((data, index) => {
+                return (
+                  <View
+                    key={index}
+                    style={{
+                      height: 100,
+                      width: '95%',
+                      borderBottomWidth: 0.5,
+                      marginHorizontal: '3%',
+                      flexDirection: 'row',
+                      justifyContent: 'space-around',
+                    }}>
+                    <View
+                      style={{
+                        width: '35%',
+                        height: '100%',
+                        justifyContent: 'space-around',
+                      }}>
+                      <Text style={{ fontSize: 16, color: textColor }}>Tarikh:</Text>
+                      <Text style={{ fontSize: 16, color: textColor }}>
+                        No Resit:
+                      </Text>
+                      <Text style={{ fontSize: 16, color: textColor }}>
+                        Nilai Pembelian:
+                      </Text>
+                    </View>
+                    <View
+                      style={{
+                        width: '70%',
+                        height: '100%',
+                        justifyContent: 'space-around',
+                        alignItems: 'flex-end',
+                      }}>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          color: textColor,
+                          fontWeight: '500',
+                        }}>
+                        {data.SaleDate}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          color: textColor,
+                          fontWeight: '500',
+                        }}>
+                        {data.ResitNo}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          color: textColor,
+                          fontWeight: '500',
+                        }}>
+                        RM {data.TotalAmt.toFixed(2)}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            <View
               style={{
-                fontSize: 28,
-                fontWeight: '900',
-                color: 'brown',
-                marginRight: 20,
-                marginTop: 6,
+                height: 130,
+                width: '95%',
+                marginHorizontal: '3%',
+                justifyContent: 'center',
+                alignItems: 'flex-end',
               }}>
-              RM {TotalAmount}
-            </Text>
+              <Text
+                style={{ fontSize: 18, fontWeight: 'bold', color: textColor }}>
+                Jumlah Pembelian
+              </Text>
+              <Text
+                style={{
+                  fontSize: 28,
+                  fontWeight: '900',
+                  color: 'brown',
+                  marginRight: 20,
+                  marginTop: 6,
+                }}>
+                RM {TotalAmount}
+              </Text>
+            </View>
           </View>
-        </View>
-      </ScrollView>
-      )
-    }
-    else{
-      return null
+        </ScrollView>
+      );
     }
   };
   return (
-    <SafeAreaView style={{flex:1}}>
-    <Header Screen='Transaksi' />
-    {isLoader && <Loader />}
-    <ImageBackground  source={backdrop} style={{height:'100%'}}>
-    <View style={styles.toggles}>
-      <View
-        style={{
-          flexDirection: 'row',
-          backgroundColor: '#CDCDCD',
-          width: "95%",
-          justifyContent: 'center',
-          borderRadius: 10,
-        }}>
-        <TouchableOpacity
-          style={[
-            styles.togglebutton,
-            selectedButton === 'Mata ganjaran'
-              ? {backgroundColor: '#DFDFDF'}
-              : {backgroundColor: '#CDCDCD'},
-          ]}
-          onPress={() => setSelectedButton('Mata ganjaran')}>
-          <Text
-            numberOfLines={1}
-            adjustsFontSizeToFit={true}
-            style={{
-              color: selectedButton === 'Mata ganjaran' ? '#292A60' : 'gray',
-              fontSize: 11,
-              fontWeight: 'normal',
-              textAlign: 'center',
-              paddingHorizontal: 1,
-            }}>
-           MATA GANJARAN
-          </Text>
-        </TouchableOpacity>
+    <SafeAreaView style={{ flex: 1 }}>
+      <Header Screen="Transaksi" />
+      {isLoader && <Loader />}
+      <ImageBackground source={backdrop} style={{ height: '100%' }}>
+        {mode === 'points' ? (
+          <View style={styles.toggles}>
+            <View
+              style={{
+                flexDirection: 'row',
+                backgroundColor: '#CDCDCD',
+                width: '95%',
+                justifyContent: 'center',
+                borderRadius: 10,
+              }}>
+              <TouchableOpacity
+                style={[
+                  styles.togglebutton,
+                  selectedButton === 'History'
+                    ? { backgroundColor: '#DFDFDF' }
+                    : { backgroundColor: '#CDCDCD' },
+                ]}
+                onPress={() => setSelectedButton('History')}>
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit={true}
+                  style={{
+                    color: selectedButton === 'History' ? '#292A60' : 'gray',
+                    fontSize: 13,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    paddingHorizontal: 2,
+                  }}>
+                  SEJARAH MATA
+                </Text>
+              </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.togglebutton,
-            selectedButton === 'History'
-              ? {backgroundColor: '#DFDFDF'}
-              : {backgroundColor: '#CDCDCD'},
-          ]}
-          onPress={() => setSelectedButton('History')}>
-          <Text
-            numberOfLines={1}
-            adjustsFontSizeToFit={true}
-            style={{
-              color: selectedButton === 'History' ? '#292A60' : 'gray',
-              fontSize: 11,
-              fontWeight: 'normal',
-              textAlign: 'center',
-              paddingHorizontal: 1,
-            }}>
-            SEJARAH MATA
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.togglebutton,
-            selectedButton === 'Sejarah pembelian'
-              ? {backgroundColor: '#DFDFDF'}
-              : {backgroundColor: '#CDCDCD'},
-          ]}
-          onPress={() => setSelectedButton('Sejarah pembelian')}>
-          <Text
-            numberOfLines={1}
-            adjustsFontSizeToFit={true}
-            style={{
-              color: selectedButton === 'Sejarah pembelian' ? '#292A60' : 'gray',
-              fontSize: 11,
-              fontWeight: 'normal',
-              textAlign: 'center',
-              paddingHorizontal: 1,
-            }}>
-            SEJARAH PEMBELIAN
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-    <View style={{height: '80%', width: '95%', marginHorizontal: '3%'}}>
-      {renderContent()}
-    </View>
-    </ImageBackground>
-  </SafeAreaView>
-  )
-}
+              <TouchableOpacity
+                style={[
+                  styles.togglebutton,
+                  selectedButton === 'Mata ganjaran'
+                    ? { backgroundColor: '#DFDFDF' }
+                    : { backgroundColor: '#CDCDCD' },
+                ]}
+                onPress={() => setSelectedButton('Mata ganjaran')}>
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit={true}
+                  style={{
+                    color:
+                      selectedButton === 'Mata ganjaran' ? '#292A60' : 'gray',
+                    fontSize: 13,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    paddingHorizontal: 2,
+                  }}>
+                  MATA LUPUT
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <View style={styles.toggles}>
+            <View
+              style={{
+                flexDirection: 'row',
+                backgroundColor: '#CDCDCD',
+                width: '95%',
+                justifyContent: 'center',
+                borderRadius: 10,
+              }}>
+              <View
+                style={[
+                  styles.togglebutton,
+                  { backgroundColor: '#DFDFDF' },
+                ]}>
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit={true}
+                  style={{
+                    color: '#292A60',
+                    fontSize: 13,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    paddingHorizontal: 2,
+                  }}>
+                  SEJARAH PEMBELIAN
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+        <View
+          style={{
+            flex: 1,
+            width: '95%',
+            alignSelf: 'center',
+            marginBottom: 10,
+          }}>
+          {renderContent()}
+        </View>
+      </ImageBackground>
+    </SafeAreaView>
+  );
+};
 
 export default Transition
 
@@ -296,7 +417,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    textTransform:'uppercase'
+    textTransform: 'uppercase'
   },
   togglebutton: {
     height: 50,
@@ -307,20 +428,20 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   card: {
-    color:'black',
+    color: 'black',
     backgroundColor: 'lightgrey',
     padding: 10,
     marginVertical: 10,
     borderRadius: 8,
-    flexDirection:'row',
-    alignItems:'center',
-    justifyContent:'center'
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   couponCode: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
-    color:"black"
+    color: "black"
   },
   couponDate: {
     fontSize: 16,
@@ -328,29 +449,48 @@ const styles = StyleSheet.create({
   },
   customerId: {
     fontSize: 16,
-    color:'black'
+    color: 'black'
   },
   noCouponText: {
     fontSize: 16,
     textAlign: 'center',
     marginTop: 20,
   },
+  tableWrapper: {
+    marginTop: 10,
+    backgroundColor: '#ffffff',
+  },
   tableHeader: {
-    height: 40,
-    backgroundColor: '#f5f5f5',
+    height: 48,
+    backgroundColor: '#ffffff',
   },
   tableHeaderText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#000000',
     textAlign: 'center',
+    paddingHorizontal: 2,
+  },
+  tableRow: {
+    height: 46,
+    backgroundColor: '#ffffff',
   },
   tableCellText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: 'black',
+    fontWeight: 'bold',
+    color: '#000000',
     textAlign: 'center',
-  }
+  },
+  emptyContainer: {
+    marginTop: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: 'gray',
+    fontWeight: '500',
+  },
 })
 
 

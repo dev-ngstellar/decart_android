@@ -496,7 +496,7 @@ const Dashboard = ({ navigation }) => {
           <TouchableOpacity
             style={{ height: 80, width: 80 }}
             onPress={() => {
-              navigation.navigate("Transition", { deviceId });
+              navigation.navigate("Transition", { deviceId, mode: 'points', timestamp: Date.now() });
             }}
           >
             <Image

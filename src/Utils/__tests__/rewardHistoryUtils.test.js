@@ -2,9 +2,9 @@ import { formatDate, formatExpiry, formatPoints, sortHistoryData } from '../rewa
 
 describe('rewardHistoryUtils', () => {
   describe('formatDate', () => {
-    it('formats ISO date to DD MMM YYYY', () => {
-      expect(formatDate('2026-06-20T00:00:00')).toBe('20 Jun 2026');
-      expect(formatDate('2024-08-05T00:00:00')).toBe('05 Aug 2024');
+    it('formats ISO date to DD/MM/YYYY', () => {
+      expect(formatDate('2026-06-20T00:00:00')).toBe('20/06/2026');
+      expect(formatDate('2024-08-05T00:00:00')).toBe('05/08/2024');
     });
 
     it('returns "-" for null, undefined, or empty date', () => {

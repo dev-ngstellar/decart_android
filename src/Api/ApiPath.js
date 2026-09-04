@@ -1,7 +1,7 @@
 // live
-export const BASE_URL = "http://115.187.22.233:2020/api/";
+// export const BASE_URL = "http://115.187.22.233:2020/api/";
 // test
-//export const BASE_URL = "http://115.187.22.233:1588/api/";
+export const BASE_URL = "http://115.187.22.233:1588/api/";
 
 export const DEVICE_LOG = BASE_URL + "DeviceLog";
 export const GET_CUSTOMER_TYPES = BASE_URL + "GeTCustomerTypes";

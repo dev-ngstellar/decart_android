@@ -239,6 +239,12 @@ const BottomTabBarNavigator = ({ setModalVisible }) => {
       <Tab.Screen
         name="Transition"
         component={Transition}
+        initialParams={{ mode: 'pembelian' }}
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            navigation.navigate('Transition', { mode: 'pembelian', timestamp: Date.now() });
+          },
+        })}
         options={{
           headerShown: false,
           tabBarIcon: (tabInfo) => (
