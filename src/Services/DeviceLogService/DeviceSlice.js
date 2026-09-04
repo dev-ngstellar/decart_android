@@ -19,9 +19,10 @@ export const DeviceLogThunk = createAsyncThunk('deviceLog', async action => {
 export const VersionLogThunk = createAsyncThunk('versionLog', async action => {
   try {
     const response = await DeviceVersionApi(action.payload);
-    return response.data;
+    return response?.data || response;
   } catch (error) {
-    console.log(error);
+    console.log("VersionLogThunk error:", error);
+    throw error;
   }
 });
 

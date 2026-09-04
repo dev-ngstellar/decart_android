@@ -21,22 +21,38 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   async response => {
     // If backend uses 200 OK status but provides a custom error for invalid session/device
-    // Add logic here based on your backend response structure
     const data = response.data;
     if (!data) return response;
 
-    const stringified = JSON.stringify(data).toLowerCase();
-
+    const url = response.config?.url || "";
+    // Do not trigger session clearing on authentication, version check, or asset endpoints
     if (
-      data.ApiResultID === -1 || data.ApiResultID === 3 || data.ApiResultID === 2 || data.ApiResultID === 0 ||
-      data.API_Result_ID === -1 || data.API_Result_ID === 3 || data.API_Result_ID === 2 || data.API_Result_ID === 0 ||
-      stringified.includes('sesi') ||
-      stringified.includes('log masuk') ||
-      stringified.includes('main device') ||
-      stringified.includes('peranti utama') ||
-      stringified.includes('token expired') ||
-      stringified.includes('invalid_grant')
+      url.includes("CustomerLogin") ||
+      url.includes("BiometricLogin") ||
+      url.includes("UpdateDeviceID") ||
+      url.includes("DeviceVersionLog") ||
+      url.includes("GetPromolink") ||
+      url.includes("GetBanner")
     ) {
+      return response;
+    }
+
+    // Only inspect error message text fields rather than large payloads (e.g. base64 images)
+    const msg = (
+      (typeof data?.errorMessage === 'string' ? data.errorMessage : '') + ' ' +
+      (typeof data?.DeviceMsg === 'string' ? data.DeviceMsg : '') + ' ' +
+      (typeof data?.data?.DeviceMsg === 'string' ? data.data.DeviceMsg : '') + ' ' +
+      (typeof data?.data?.errorMessage === 'string' ? data.data.errorMessage : '')
+    ).toLowerCase();
+
+    const isSessionExpired =
+      msg.includes('sesi tamat') ||
+      msg.includes('token expired') ||
+      msg.includes('invalid_grant') ||
+      msg.includes('peranti utama') ||
+      msg.includes('log masuk di peranti lain');
+
+    if (isSessionExpired) {
       await clearData();
       reset('Login');
       return Promise.reject(new Error("Session Expired"));

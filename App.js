@@ -37,23 +37,26 @@ const App = () => {
 
     // Check specific IDs that usually indicate failure or device mismatch
     if (
-      data.ApiResultID === 2 || data.ApiResultID === -1 || data.ApiResultID === 0 ||
-      data.API_Result_ID === 2 || data.API_Result_ID === -1 || data.API_Result_ID === 0 ||
+      data.ApiResultID === 2 || data.ApiResultID === -1 ||
+      data.API_Result_ID === 2 || data.API_Result_ID === -1 ||
       data.ApiResultID === 3 || data.API_Result_ID === 3
     ) {
       return true;
     }
 
-    // Deep stringify to catch deep messages like 'log masuk di peranti lain'
-    const stringified = JSON.stringify(data).toLowerCase();
+    const msg = (
+      (typeof data?.errorMessage === 'string' ? data.errorMessage : '') + ' ' +
+      (typeof data?.DeviceMsg === 'string' ? data.DeviceMsg : '') + ' ' +
+      (typeof data?.data?.DeviceMsg === 'string' ? data.data.DeviceMsg : '') + ' ' +
+      (typeof data?.data?.errorMessage === 'string' ? data.data.errorMessage : '')
+    ).toLowerCase();
 
     return (
-      stringified.includes('log masuk') ||
-      stringified.includes('main device') ||
-      stringified.includes('peranti utama') ||
-      stringified.includes('sesi') ||
-      stringified.includes('token expired') ||
-      stringified.includes('invalid_grant')
+      msg.includes('sesi tamat') ||
+      msg.includes('token expired') ||
+      msg.includes('invalid_grant') ||
+      msg.includes('peranti utama') ||
+      msg.includes('log masuk di peranti lain')
     );
   };
 

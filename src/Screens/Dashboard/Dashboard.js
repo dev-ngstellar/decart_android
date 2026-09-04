@@ -29,7 +29,7 @@ import {
   GetNotifiationThunk,
   GetNotifiationCountThunk,
 } from "../../Services/NotificationService/NotificationSlice";
-import { getData } from "../../Utils/localHelper";
+import { getData, storeData } from "../../Utils/localHelper";
 import { GetVouchersThunk } from "../../Services/GetVoucherService/GetVoucherSlice";
 import DeviceInfo from "react-native-device-info";
 import { GetCouponThunk } from "../../Services/GetCouponService/GetCouponSlice";
@@ -78,10 +78,19 @@ const Dashboard = ({ navigation }) => {
   UseBackHandler(isFocused);
 
   const getCustomerProfile = async () => { 
-    const custId = await getData("CustId");
+    let custId = await getData("CustId");
+    if (!custId) {
+      custId = await getData("CustID");
+    }
+    if (!custId && ProfileData?.[0]?.CustId) {
+      custId = String(ProfileData[0].CustId);
+    }
+    if (!custId && loginData?.CustId) {
+      custId = String(loginData.CustId);
+    }
 
     const payload = {
-      CustId: custId,
+      CustId: custId ? String(custId) : "",
       SerNo: "",
       CustName: "",
       cIC: "",
@@ -89,18 +98,15 @@ const Dashboard = ({ navigation }) => {
     console.log("Dashboard - Customer Profile Payload:", payload);
     try {
       const response = await dispatch(GetCustomerProfileThunk({ payload }));
-      if (response) {
-
-        // checkDeviceID(); logged id device id and reponse device id
-      //  if (deviceId !== ProfileData[0]?.DevID) {
-      //     Alert.alert("Peranti ini tidak berdaftar");
-      //
-      // app version check if both are not equal alert for update the app response "AppVer":"2.0",
-
+      if (response && response.payload && Array.isArray(response.payload) && response.payload.length > 0 && response.payload[0]?.CustId) {
+        const profileCustId = String(response.payload[0].CustId);
+        await storeData("CustId", profileCustId);
+        return profileCustId;
       }
     } catch (error) {
-      console.log(error);
+      console.log("Dashboard - Customer Profile Error:", error);
     }
+    return custId ? String(custId) : null;
   };
 
   const getCampaigns = async () => {
@@ -176,12 +182,12 @@ const Dashboard = ({ navigation }) => {
       setAppName(appName);
       
       // Call APIs with the deviceId directly
-      await getCustomerProfile();
+      const activeCustId = await getCustomerProfile();
       await getNotification(id);
       await getPromo();
       await getBanner();
       await getNotificationCount(id);
-      await VersionLog(id); // Add VersionLog call
+      await VersionLog(id, activeCustId);
     };
     fetchDeviceId();
   }, []);
@@ -246,39 +252,73 @@ const Dashboard = ({ navigation }) => {
       // console.log(error, "getBannerError");
     }
   };
-    const VersionLog = async (devId = deviceId) => {
+  const VersionLog = async (devId = deviceId, explicitCustId = null) => {
     const APP_VERSION = DeviceInfo.getVersion();
-    const custId = await getData("CustId");
+    const currentDevId = devId || deviceId || (await DeviceInfo.getUniqueId());
+
+    // Dynamically obtain CustID from parameter, storage, ProfileData, or loginData
+    let custId = explicitCustId;
+    if (!custId) {
+      custId = await getData("CustId");
+    }
+    if (!custId) {
+      custId = await getData("CustID");
+    }
+    if (!custId && ProfileData && ProfileData.length > 0 && ProfileData[0]?.CustId) {
+      custId = String(ProfileData[0].CustId);
+      await storeData("CustId", custId);
+    }
+    if (!custId && loginData?.CustId) {
+      custId = String(loginData.CustId);
+      await storeData("CustId", custId);
+    }
+
     const payload = {
-      CustID: custId,
-      DevID: devId,
+      CustID: custId ? String(custId) : null,
+      DevID: currentDevId,
       HPVerNo: APP_VERSION,
     };
-    console.log(payload);
-    console.log("Dashboard - Version Log Payload:", payload);
-    const res = await dispatch(VersionLogThunk({ payload }));
-    console.log("Version Log :: " + JSON.stringify(res));
-    const backendVersion = res?.payload?.DeCart_Ver;
-    const message = res?.payload?.API_Result;
-    console.log("Local App Version:", APP_VERSION);
-    console.log("Backend App Version:", backendVersion);
 
-    // ✅ If version is not latest → show popup
-    if (backendVersion && backendVersion !== APP_VERSION) {
-      Alert.alert(
-        "New update available... please update to the New version 2.1",
-        message || `A new version (${backendVersion}) of the app is available.`,
-        [{ text: "OK" }]
-      );
-    } else {
-      console.log("App is up to date.");
+    // Temporary debug logs around the Version Log API call
+    console.log("=== Version Log API Debug ===");
+    console.log("CustID:", payload.CustID);
+    console.log("DevID:", payload.DevID);
+    console.log("HPVerNo:", payload.HPVerNo);
+    console.log("Complete Request Payload:", JSON.stringify(payload));
+    console.log("Dashboard - Version Log Payload:", payload);
+
+    try {
+      const res = await dispatch(VersionLogThunk({ payload }));
+      console.log("Version Log :: " + JSON.stringify(res));
+
+      const backendVersion = res?.payload?.DeCart_Ver || res?.payload?.data?.DeCart_Ver;
+      const message = res?.payload?.API_Result || res?.payload?.data?.API_Result;
+      console.log("Local App Version:", APP_VERSION);
+      console.log("Backend App Version:", backendVersion);
+
+      // Verify response and version
+      if (backendVersion) {
+        if (backendVersion !== APP_VERSION) {
+          Alert.alert(
+            `New update available... please update to the New version ${backendVersion}`,
+            message || `A new version (${backendVersion}) of the app is available.`,
+            [{ text: "OK" }]
+          );
+        } else {
+          console.log("App is up to date.");
+        }
+      } else {
+        console.warn("Version Log API failed, payload is null, or DeCart_Ver is undefined:", res);
+      }
+    } catch (err) {
+      console.error("Version Log API error:", err);
     }
-};
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await getCustomerProfile();
-    await VersionLog(deviceId);
+    const activeCustId = await getCustomerProfile();
+    await VersionLog(deviceId, activeCustId);
     setRefreshing(false);
   };
 
