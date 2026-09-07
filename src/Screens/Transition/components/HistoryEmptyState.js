@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const HistoryEmptyState = () => {
+const HistoryEmptyState = ({ message = 'Tiada maklumat mata luput' }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>No History Available</Text>
+      <Text style={styles.text}>{message}</Text>
     </View>
   );
 };

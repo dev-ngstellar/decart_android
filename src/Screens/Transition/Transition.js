@@ -2,7 +2,7 @@ import { ImageBackground, RefreshControl, SafeAreaView, ScrollView, StyleSheet, 
 import React, { useEffect, useState } from 'react'
 import Header from '../../component/Header';
 import { useDispatch, useSelector } from 'react-redux';
-import { GetArmsPointsHistoryThunk, GetPointsThunk } from '../../Services/GetPointsService/GetPointSlice';
+import { GetArmsPointsHistoryThunk, GetPointHistoryThunk, GetPointsThunk } from '../../Services/GetPointsService/GetPointSlice';
 import DeviceInfo from 'react-native-device-info';
 import { getData } from '../../Utils/localHelper';
 import { GetSalesHistoryThunk } from '../../Services/GetSalesHistory/SalesHistorySlice';
@@ -101,6 +101,29 @@ const Transition = ({ route }) => {
 
   const TotalAmount = SalesHistoryData?.reduce((sum, item) => sum + item.TotalAmt, 0).toFixed(2);
 
+  const bakiPoints = (() => {
+    let pts = null;
+    if (Array.isArray(PointsData) && PointsData.length > 0) {
+      const first = PointsData[0];
+      pts = first?.Points ?? first?.points ?? first?.PointsBalance ?? first?.PointBalance;
+    } else if (PointsData && typeof PointsData === 'object') {
+      pts = PointsData?.Points ?? PointsData?.points ?? PointsData?.PointsBalance ?? PointsData?.PointBalance;
+    } else if (typeof PointsData === 'number' || (typeof PointsData === 'string' && PointsData.trim() !== '')) {
+      pts = PointsData;
+    }
+
+    if (pts === null || pts === undefined || pts === '') {
+      if (ArmsPointsHistoryData && Array.isArray(ArmsPointsHistoryData) && ArmsPointsHistoryData.length > 0) {
+        const fallback = ArmsPointsHistoryData[0]?.PointsBalance ?? ArmsPointsHistoryData[0]?.pointsBalance;
+        if (fallback !== undefined && fallback !== null && String(fallback).trim() !== '') {
+          pts = fallback;
+        }
+      }
+    }
+
+    return pts !== null && pts !== undefined ? String(pts) : '0';
+  })();
+
   useEffect(() => {
     if (mode === 'points') {
       setSelectedButton('History');
@@ -116,56 +139,78 @@ const Transition = ({ route }) => {
     };
     fetchDeviceId();
   }, [route?.params?.deviceId]);
+
   const getPoints = async () => {
-    const custId = await getData("CustId")
+    const custId = await getData("CustId");
+    const devId = deviceId || (await DeviceInfo.getUniqueId());
     const payload = {
       CustID: custId,
-      DevID: deviceId
-    }
-    const id = deviceId || await DeviceInfo.getUniqueId();
+      DevID: devId,
+    };
     console.log("Transition - Get Points Payload:", payload);
     await dispatch(GetPointsThunk({ payload }));
   };
 
   const getSalesHistory = async () => {
     const custId = await getData('CustId');
+    const devId = deviceId || (await DeviceInfo.getUniqueId());
     const payload = {
       CustID: custId,
-      DevID: deviceId,
+      DevID: devId,
     };
     console.log("Transition - Get Sales History Payload:", payload);
     await dispatch(GetSalesHistoryThunk({ payload }));
   };
 
-  const getPointsHistory = async () => {
+  const getArmsPointsHistory = async () => {
     const custId = await getData('CustId');
     const devId = deviceId || (await DeviceInfo.getUniqueId());
     const payload = {
       CustId: custId,
       DevID: devId,
     };
-    console.log("Transition - Get ARMS Points History Payload:", payload);
+    console.log("Transition - Get ARMS Points History (Sejarah Mata) Payload:", payload);
     await dispatch(GetArmsPointsHistoryThunk(payload));
   };
 
-
+  const getPointsHistory = async () => {
+    const custId = await getData('CustId');
+    const devId = deviceId || (await DeviceInfo.getUniqueId());
+    const payload = {
+      CustID: custId,
+      DevID: devId,
+    };
+    console.log("Transition - Get Points History (Mata Luput) Payload:", payload);
+    await dispatch(GetPointHistoryThunk(payload));
+  };
 
   useEffect(() => {
-    getPoints()
-    getSalesHistory()
-    getPointsHistory()
-  }, [deviceId])
+    getPoints();
+    getSalesHistory();
+    getArmsPointsHistory();
+    getPointsHistory();
+  }, [deviceId]);
+
+  useEffect(() => {
+    if (selectedButton === 'History') {
+      getPoints();
+      getArmsPointsHistory();
+    } else if (selectedButton === 'Mata ganjaran') {
+      getPointsHistory();
+    }
+  }, [selectedButton]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await getPoints()
-    await getSalesHistory()
-    await getPointsHistory()
+    await getPoints();
+    await getSalesHistory();
+    await getArmsPointsHistory();
+    await getPointsHistory();
     setRefreshing(false);
   };
   const renderContent = () => {
     if (mode === 'points') {
-      if (selectedButton === 'Mata ganjaran') {
+      if (selectedButton === 'History') {
         return (
           <ScrollView
             style={{ flex: 1 }}
@@ -174,6 +219,32 @@ const Transition = ({ route }) => {
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }>
+            <View
+              style={{
+                width: '100%',
+                marginVertical: 14,
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: '900',
+                  color: textColor,
+                  marginRight: 6,
+                }}>
+                Baki Terkini :
+              </Text>
+              <Text
+                style={{
+                  fontSize: 26,
+                  fontWeight: '900',
+                  color: 'brown',
+                }}>
+                {bakiPoints}
+              </Text>
+            </View>
             {sortedPointsHistory && sortedPointsHistory.length > 0 ? (
               <View style={styles.tableWrapper}>
                 <Table borderStyle={{ borderWidth: 1, borderColor: '#000000' }}>
@@ -191,12 +262,12 @@ const Transition = ({ route }) => {
               </View>
             ) : (
               <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>Tiada maklumat mata luput</Text>
+                <Text style={styles.emptyText}>Tiada maklumat sejarah mata</Text>
               </View>
             )}
           </ScrollView>
         );
-      } else if (selectedButton === 'History') {
+      } else if (selectedButton === 'Mata ganjaran') {
         return (
           <RewardHistoryTab
             deviceId={deviceId}

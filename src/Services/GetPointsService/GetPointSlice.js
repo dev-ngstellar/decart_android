@@ -4,7 +4,8 @@ import { setIsLoading } from '../LoginService/LoginSlice';
 
 const initialState = {
   PointsData: [],
-  PointsHistoryData:[],
+  PointsHistoryData: [],
+  PointsHistoryError: null,
   ArmsPointsHistoryData: [],
   ArmsPointsHistoryError: null,
 };
@@ -14,18 +15,21 @@ export const GetPointsThunk = createAsyncThunk('getPoints', async (action,{dispa
   try {
     const response = await GetPointsApi(action.payload);
     dispatch(setIsLoading(false))
-    return response.data;
+    return (response && response.data !== undefined) ? response.data : response;
   } catch (error) {
     dispatch(setIsLoading(false))
     console.log(error);
   }
 });
-export const GetPointHistoryThunk = createAsyncThunk('getPointHistory', async action => {
+export const GetPointHistoryThunk = createAsyncThunk('getPointHistory', async (action, { rejectWithValue }) => {
   try {
-    const response = await GetPointsHistoryApi(action.payload);
-    return response.data;
+    const payload = action?.payload || action;
+    const response = await GetPointsHistoryApi(payload);
+    const data = (response && response.data !== undefined) ? response.data : response;
+    return data;
   } catch (error) {
-    console.log(error);
+    const msg = error?.response?.data?.errorMessage || error?.response?.data?.message || error?.message || 'Unable to load history.';
+    return rejectWithValue(msg);
   }
 });
 
@@ -50,10 +54,17 @@ const GetPointsSlice = createSlice({
   extraReducers: builder => {
     builder
     .addCase(GetPointsThunk.fulfilled, (state, action) => {
-      return {...state, PointsData: action.payload};
+      const payload = action.payload;
+      const data = Array.isArray(payload) ? payload : (Array.isArray(payload?.data) ? payload.data : payload);
+      return {...state, PointsData: data};
     })
     .addCase(GetPointHistoryThunk.fulfilled, (state, action) => {
-      return {...state, PointsHistoryData: action.payload};
+      const payload = action.payload;
+      const data = Array.isArray(payload) ? payload : (Array.isArray(payload?.data) ? payload.data : []);
+      return {...state, PointsHistoryData: data, PointsHistoryError: null};
+    })
+    .addCase(GetPointHistoryThunk.rejected, (state, action) => {
+      return {...state, PointsHistoryData: [], PointsHistoryError: action.payload || 'Unable to load history.'};
     })
     .addCase(GetArmsPointsHistoryThunk.fulfilled, (state, action) => {
       const payload = action.payload;

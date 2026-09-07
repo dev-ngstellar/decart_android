@@ -69,8 +69,8 @@ export const formatPoints = (val) => {
 export const sortHistoryData = (list) => {
   if (!Array.isArray(list)) return [];
   return [...list].sort((a, b) => {
-    const dateAStr = a.TransactionDate || a.transactionDate;
-    const dateBStr = b.TransactionDate || b.transactionDate;
+    const dateAStr = a.TransactionDate || a.transactionDate || a.PointsExpiryDate || a.pointsExpiryDate;
+    const dateBStr = b.TransactionDate || b.transactionDate || b.PointsExpiryDate || b.pointsExpiryDate;
     const dateA = parseDateTime(dateAStr);
     const dateB = parseDateTime(dateBStr);
     const timeA = dateA ? dateA.getTime() : 0;

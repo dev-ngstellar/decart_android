@@ -3,7 +3,7 @@ import { ScrollView, RefreshControl, StyleSheet, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import DeviceInfo from 'react-native-device-info';
 import { getData } from '../../../Utils/localHelper';
-import { GetArmsPointsHistoryThunk } from '../../../Services/GetPointsService/GetPointSlice';
+import { GetPointHistoryThunk } from '../../../Services/GetPointsService/GetPointSlice';
 import { sortHistoryData } from '../../../Utils/rewardHistoryUtils';
 import RewardHistoryTable from './RewardHistoryTable';
 import HistoryLoadingState from './HistoryLoadingState';
@@ -12,8 +12,8 @@ import HistoryErrorState from './HistoryErrorState';
 
 const RewardHistoryTab = ({ deviceId, refreshing: parentRefreshing, onRefreshParent }) => {
   const dispatch = useDispatch();
-  const armsPointsHistoryData = useSelector(state => state.getPoints?.ArmsPointsHistoryData);
-  const armsPointsHistoryError = useSelector(state => state.getPoints?.ArmsPointsHistoryError);
+  const pointsHistoryData = useSelector(state => state.getPoints?.PointsHistoryData);
+  const pointsHistoryError = useSelector(state => state.getPoints?.PointsHistoryError);
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -36,11 +36,11 @@ const RewardHistoryTab = ({ deviceId, refreshing: parentRefreshing, onRefreshPar
         DevID: devId,
       };
 
-      console.log('RewardHistoryTab - Fetch Payload:', JSON.stringify(payload));
-      const resultAction = await dispatch(GetArmsPointsHistoryThunk(payload));
+      console.log('RewardHistoryTab - Fetch Payload (POINTS_HISTORY):', JSON.stringify(payload));
+      const resultAction = await dispatch(GetPointHistoryThunk(payload));
       console.log('RewardHistoryTab - Fetch Response:', JSON.stringify(resultAction));
       
-      if (GetArmsPointsHistoryThunk.rejected.match(resultAction)) {
+      if (GetPointHistoryThunk.rejected.match(resultAction)) {
         const message = resultAction.payload || 'Unable to load history.';
         console.log('RewardHistoryTab - Fetch Rejected:', message);
         setErrorMsg(message);
@@ -67,7 +67,7 @@ const RewardHistoryTab = ({ deviceId, refreshing: parentRefreshing, onRefreshPar
   };
 
   // Sort data latest first while preserving tie order
-  const rawList = Array.isArray(armsPointsHistoryData) ? armsPointsHistoryData : [];
+  const rawList = Array.isArray(pointsHistoryData) ? pointsHistoryData : [];
   const sortedData = sortHistoryData(rawList);
 
   const renderBody = () => {
@@ -75,9 +75,9 @@ const RewardHistoryTab = ({ deviceId, refreshing: parentRefreshing, onRefreshPar
       return <HistoryLoadingState />;
     }
 
-    if (errorMsg || armsPointsHistoryError) {
+    if (errorMsg || pointsHistoryError) {
       if (sortedData.length === 0) {
-        return <HistoryErrorState errorMessage={errorMsg || armsPointsHistoryError} onRetry={fetchHistoryData} />;
+        return <HistoryErrorState errorMessage={errorMsg || pointsHistoryError} onRetry={fetchHistoryData} />;
       }
     }
 
