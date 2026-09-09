@@ -27,6 +27,7 @@ import {clearData, getData} from './src/Utils/localHelper';
 import DeviceInfo from 'react-native-device-info';
 import Campaigns from './src/Screens/Dashboard/Campaigns';
 import { CustomerProfileApi } from './src/Services/GetCustomerProfile/CustomerProfileApi';
+import CustomAlert from './src/component/CustomAlert';
 
 const Stack = createNativeStackNavigator();
 const App = () => {
@@ -206,6 +207,7 @@ const App = () => {
     
         </Stack.Navigator>
       </NavigationContainer>
+      <CustomAlert />
     </Provider>
   );
 };

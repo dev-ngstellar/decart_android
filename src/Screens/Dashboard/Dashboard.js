@@ -72,12 +72,12 @@ const Dashboard = ({ navigation }) => {
 
   const Banner = GetBannerData?.data?.map((item) => ({
     uri: `data:image/png;base64,${item.Data}`,
-  }));   
+  }));
 
   const isFocused = useIsFocused();
   UseBackHandler(isFocused);
 
-  const getCustomerProfile = async () => { 
+  const getCustomerProfile = async () => {
     let custId = await getData("CustId");
     if (!custId) {
       custId = await getData("CustID");
@@ -119,7 +119,7 @@ const Dashboard = ({ navigation }) => {
     try {
       const resp = await dispatch(getSubCampaignsThunk({ payload }));
       console.log("Dashboard - GetSubCampaigns Response:", JSON.stringify(resp.payload));
-      
+
       // Only show the modal if there's a valid campaign with CampaignID > 0
       if (resp && resp.payload && resp.payload.length > 0 && resp.payload[0]?.CampaignID > 0) {
         setIsModalVisible(true)
@@ -180,7 +180,7 @@ const Dashboard = ({ navigation }) => {
       setAppVersion(version);
       const appName = await DeviceInfo.getApplicationName();
       setAppName(appName);
-      
+
       // Call APIs with the deviceId directly
       const activeCustId = await getCustomerProfile();
       await getNotification(id);
@@ -210,10 +210,10 @@ const Dashboard = ({ navigation }) => {
       CustID: custId,
       DevID: devId,
     };
-   
-   console.log("Dashboard - Notification Payload:", payload);
+
+    console.log("Dashboard - Notification Payload:", payload);
     const response = await dispatch(GetNotifiationThunk({ payload }));
-     //console.log("notification data:", response);
+    //console.log("notification data:", response);
   };
 
   //notification count api call
@@ -299,9 +299,24 @@ const Dashboard = ({ navigation }) => {
       // Verify response and version
       if (backendVersion) {
         if (backendVersion !== APP_VERSION) {
+          const targetVer = backendVersion || '2.1';
+          const versionText = `ver ${targetVer}`;
+          let alertMessage = message;
+
+          if (!alertMessage || /new update|please update/i.test(alertMessage)) {
+            alertMessage = `Sila Kemaskini kepada versi yang terbaru ${versionText}!`;
+          } else {
+            const hasVersion =
+              alertMessage.includes(targetVer) || /ver\s*[\d.]+/i.test(alertMessage);
+            if (!hasVersion) {
+              const cleanMsg = alertMessage.replace(/[!. ]+$/, '');
+              alertMessage = `${cleanMsg} ${versionText}!`;
+            }
+          }
+
           Alert.alert(
-            `New update available... please update to the New version ${backendVersion}`,
-            message || `A new version (${backendVersion}) of the app is available.`,
+            alertMessage,
+            "",
             [{ text: "OK" }]
           );
         } else {
@@ -335,7 +350,7 @@ const Dashboard = ({ navigation }) => {
   useEffect(() => {
     const triggerAllAPIs = async () => {
       console.log("Dashboard - Triggering all APIs for payload verification");
-      
+
       // Trigger GetSubCampaigns if not already called
       if (ProfileData && ProfileData.length > 0) {
         const custId = await getData("CustId");
@@ -346,7 +361,7 @@ const Dashboard = ({ navigation }) => {
         dispatch(getSubCampaignsThunk({ payload: campaignsPayload }));
       }
     };
-    
+
     if (ProfileData && ProfileData.length > 0) {
       triggerAllAPIs();
     }
