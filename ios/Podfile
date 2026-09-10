@@ -5,19 +5,13 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, min_ios_version_supported
+platform :ios, '15.0'
 prepare_react_native_project!
 
-# If you are using a `react-native-flipper` your iOS build will fail when `NO_FLIPPER=1` is set.
-# because `react-native-flipper` depends on (FlipperKit,...) that will be excluded
-#
-# To fix this you can also exclude `react-native-flipper` using a `react-native.config.js`
-# ```js
-# module.exports = {
-#   dependencies: {
-#     ...(process.env.NO_FLIPPER ? { 'react-native-flipper': { platforms: { ios: null } } } : {}),
-# ```
-flipper_config = ENV['NO_FLIPPER'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled
+# Disable Flipper for this app. The locked FlipperKit stack in this React Native version
+# is incompatible with the current Xcode toolchain and causes native compilation failures
+# in the generated Pods. This app does not require Flipper for runtime behavior.
+flipper_config = FlipperConfiguration.disabled
 
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
@@ -51,5 +45,16 @@ target 'Dekart' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
+
+    # Ensure hermes-engine generates dSYMs for archives so App Store Connect receives
+    # the hermes.framework dSYM. Some toolchains or Pod defaults build hermes without
+    # dSYMs; force DWARF with dSYM for the hermes-engine target.
+    installer.pods_project.targets.each do |target|
+      if target.name == 'hermes-engine' || target.name.include?('hermes')
+        target.build_configurations.each do |config|
+          config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
+        end
+      end
+    end
   end
 end
