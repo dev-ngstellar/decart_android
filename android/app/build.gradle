@@ -79,7 +79,7 @@ android {
         applicationId "com.dekart"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 26
+        versionCode 27
         versionName "2.1"
     }
     signingConfigs {
